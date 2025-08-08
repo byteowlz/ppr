@@ -93,3 +93,18 @@ func (p *Processor) ExtractPlaceholders(templatePath string) ([]string, error) {
 
 	return placeholders, nil
 }
+
+func (p *Processor) WriteSVG(svgContent, outputPath string) error {
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create SVG file: %w", err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(svgContent)
+	if err != nil {
+		return fmt.Errorf("failed to write SVG content: %w", err)
+	}
+
+	return nil
+}

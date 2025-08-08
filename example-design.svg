@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#2E3440"/>
+  
+  <!-- Main circle -->
+  <circle cx="960" cy="540" r="200" fill="#5E81AC" stroke="#88C0D0" stroke-width="8"/>
+  
+  <!-- Accent rectangles -->
+  <rect x="400" y="200" width="300" height="100" fill="#BF616A" rx="10"/>
+  <rect x="1220" y="200" width="300" height="100" fill="#A3BE8C" rx="10"/>
+  
+  <!-- Text -->
+  <text x="960" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ECEFF4">My Design</text>
+  
+  <!-- Bottom accent -->
+  <rect x="0" y="1000" width="1920" height="80" fill="#D08770"/>
+</svg>

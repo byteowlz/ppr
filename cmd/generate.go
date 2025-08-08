@@ -29,6 +29,7 @@ var (
 	resolutionStr  string
 	setWallpaper   bool
 	outputFilename string
+	outputSVG      bool
 )
 
 func init() {
@@ -38,6 +39,7 @@ func init() {
 	generateCmd.Flags().StringVarP(&resolutionStr, "resolution", "r", "", "Output resolution (e.g., 1920x1080)")
 	generateCmd.Flags().BoolVarP(&setWallpaper, "set-wallpaper", "w", false, "Set generated image as wallpaper")
 	generateCmd.Flags().StringVarP(&outputFilename, "filename", "f", "", "Output filename (optional)")
+	generateCmd.Flags().BoolVar(&outputSVG, "svg", false, "Output SVG file instead of PNG (for Illustrator compatibility)")
 
 	generateCmd.MarkFlagRequired("theme")
 	generateCmd.MarkFlagRequired("template")
@@ -101,17 +103,28 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	filename := outputFilename
 	if filename == "" {
 		timestamp := time.Now().Format("20060102-150405")
-		filename = fmt.Sprintf("%s-%s-%s.png", themeName, filepath.Base(templatePath), timestamp)
+		if outputSVG {
+			filename = fmt.Sprintf("%s-%s-%s.svg", themeName, filepath.Base(templatePath), timestamp)
+		} else {
+			filename = fmt.Sprintf("%s-%s-%s.png", themeName, filepath.Base(templatePath), timestamp)
+		}
 	}
 
 	finalOutputPath := filepath.Join(outputDir, filename)
 
-	generator := image.NewGenerator()
-	if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, finalOutputPath); err != nil {
-		return fmt.Errorf("failed to generate wallpaper: %w", err)
+	if outputSVG {
+		// Write SVG directly with resolved colors
+		if err := processor.WriteSVG(svgContent, finalOutputPath); err != nil {
+			return fmt.Errorf("failed to write SVG: %w", err)
+		}
+		fmt.Printf("Generated SVG: %s\n", finalOutputPath)
+	} else {
+		generator := image.NewGenerator()
+		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, finalOutputPath); err != nil {
+			return fmt.Errorf("failed to generate wallpaper: %w", err)
+		}
+		fmt.Printf("Generated wallpaper: %s (%s)\n", finalOutputPath, res.String())
 	}
-
-	fmt.Printf("Generated wallpaper: %s (%s)\n", finalOutputPath, res.String())
 
 	if setWallpaper || cfg.AutoSetWallpaper {
 		setter := wallpaper.NewSetter()
