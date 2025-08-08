@@ -25,6 +25,7 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(listThemesCmd)
+	rootCmd.AddCommand(listTemplatesCmd)
 	rootCmd.AddCommand(initConfigCmd)
 	rootCmd.AddCommand(setWallpaperCmd)
 }

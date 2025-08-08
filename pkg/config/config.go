@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -53,6 +54,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("failed to decode config file: %w", err)
 	}
 
+	// Expand tilde in paths
+	config.ThemesPath = expandPath(config.ThemesPath)
+	config.TemplatesPath = expandPath(config.TemplatesPath)
+	config.OutputPath = expandPath(config.OutputPath)
+
 	return &config, nil
 }
 
@@ -87,4 +93,12 @@ func (c *Config) EnsureDirectories() error {
 	}
 
 	return nil
+}
+
+func expandPath(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		homeDir, _ := os.UserHomeDir()
+		return filepath.Join(homeDir, path[2:])
+	}
+	return path
 }

@@ -132,11 +132,25 @@ func (tm *ThemeManager) validateTheme(theme *Theme) error {
 }
 
 func (tm *ThemeManager) GetTheme(name string) (*Theme, error) {
-	theme, exists := tm.themes[name]
-	if !exists {
-		return nil, fmt.Errorf("theme not found: %s", name)
+	// First try the exact name
+	if theme, exists := tm.themes[name]; exists {
+		return theme, nil
 	}
-	return theme, nil
+
+	// If not found, try removing base16- or base24- prefix
+	if strings.HasPrefix(name, "base16-") {
+		shortName := strings.TrimPrefix(name, "base16-")
+		if theme, exists := tm.themes[shortName]; exists {
+			return theme, nil
+		}
+	} else if strings.HasPrefix(name, "base24-") {
+		shortName := strings.TrimPrefix(name, "base24-")
+		if theme, exists := tm.themes[shortName]; exists {
+			return theme, nil
+		}
+	}
+
+	return nil, fmt.Errorf("theme not found: %s", name)
 }
 
 func (tm *ThemeManager) ListThemes() []string {

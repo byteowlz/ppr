@@ -67,6 +67,11 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		templatePath = filepath.Join(cfg.TemplatesPath, templatePath)
 	}
 
+	// Add .svg extension if not present
+	if filepath.Ext(templatePath) == "" {
+		templatePath += ".svg"
+	}
+
 	processor := svg.NewProcessor()
 	svgContent, err := processor.ProcessTemplate(templatePath, selectedTheme)
 	if err != nil {

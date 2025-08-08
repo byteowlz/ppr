@@ -37,12 +37,17 @@ Download the latest binary from the [releases page](https://github.com/byteowlz/
    ppr list-themes
    ```
 
-3. **Generate a wallpaper**:
+3. **List available templates**:
+   ```bash
+   ppr list-templates
+   ```
+
+4. **Generate a wallpaper**:
    ```bash
    ppr generate --theme nord --template geometric-simple.svg
    ```
 
-4. **Generate and set as wallpaper**:
+5. **Generate and set as wallpaper**:
    ```bash
    ppr generate --theme gruvbox-dark --template geometric-complex.svg --set-wallpaper
    ```
@@ -63,6 +68,13 @@ List all available themes.
 
 ```bash
 ppr list-themes [--details] [--variant dark|light]
+```
+
+#### `ppr list-templates`
+List all available SVG templates.
+
+```bash
+ppr list-templates [--details]
 ```
 
 #### `ppr generate`
@@ -90,6 +102,12 @@ ppr set-wallpaper IMAGE_PATH
 ### Examples
 
 ```bash
+# List available templates
+ppr list-templates
+
+# List templates with details
+ppr list-templates --details
+
 # Generate wallpaper with specific resolution
 ppr generate --theme tokyo-night-storm --template geometric-simple.svg --resolution 2560x1440
 
