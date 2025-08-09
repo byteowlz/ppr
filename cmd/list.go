@@ -51,7 +51,7 @@ func runListThemes(cmd *cobra.Command, args []string) error {
 		for _, name := range themeNames {
 			themeInfo, err := themeManager.GetThemeInfo(name)
 			if err != nil {
-				fmt.Printf("❌ %s (error: %v)\n", name, err)
+				fmt.Printf("ERROR %s (error: %v)\n", name, err)
 				continue
 			}
 
@@ -59,7 +59,7 @@ func runListThemes(cmd *cobra.Command, args []string) error {
 				continue
 			}
 
-			fmt.Printf("🎨 %s\n", name)
+			fmt.Printf("%s\n", name)
 			fmt.Printf("   Name: %s\n", themeInfo.Name)
 			fmt.Printf("   Author: %s\n", themeInfo.Author)
 			fmt.Printf("   System: %s\n", themeInfo.System)

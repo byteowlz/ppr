@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1920 1080">
+  <!-- Generator: Adobe Illustrator 29.6.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 9)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: {{base07}};
+      }
+
+      .st1 {
+        fill: {{base0E}};
+      }
+
+      .st2 {
+        fill: {{base00}};
+      }
+
+      .st3 {
+        fill: {{base0D}};
+      }
+    </style>
+  </defs>
+  <rect class="st2" width="1920" height="1080"/>
+  <g>
+    <rect class="st3" x="444.1" y="382.1" width="313.9" height="313.9"/>
+    <circle class="st1" cx="953.4" cy="540" r="157.9"/>
+    <polygon class="st0" points="1293.6 382.1 1111.3 697.9 1475.9 697.9 1293.6 382.1"/>
+  </g>
+</svg>

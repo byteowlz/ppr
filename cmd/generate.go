@@ -18,7 +18,8 @@ var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate a themed wallpaper from an SVG template",
 	Long: `Generate a themed wallpaper by applying a color theme to an SVG template.
-The output will be a PNG file with the specified or auto-detected resolution.`,
+The output will be a PNG file with the specified or auto-detected resolution.
+If no template is specified, the default template from config will be used.`,
 	RunE: runGenerate,
 }
 
@@ -34,7 +35,7 @@ var (
 
 func init() {
 	generateCmd.Flags().StringVarP(&themeName, "theme", "t", "", "Theme name to apply")
-	generateCmd.Flags().StringVarP(&templatePath, "template", "s", "", "Path to SVG template file")
+	generateCmd.Flags().StringVarP(&templatePath, "template", "s", "", "Path to SVG template file (uses default template if not specified)")
 	generateCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Output directory (optional)")
 	generateCmd.Flags().StringVarP(&resolutionStr, "resolution", "r", "", "Output resolution (e.g., 1920x1080)")
 	generateCmd.Flags().BoolVarP(&setWallpaper, "set-wallpaper", "w", false, "Set generated image as wallpaper")
@@ -42,7 +43,6 @@ func init() {
 	generateCmd.Flags().BoolVar(&outputSVG, "svg", false, "Output SVG file instead of PNG (for Illustrator compatibility)")
 
 	generateCmd.MarkFlagRequired("theme")
-	generateCmd.MarkFlagRequired("template")
 }
 
 func runGenerate(cmd *cobra.Command, args []string) error {
@@ -63,6 +63,12 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	selectedTheme, err := themeManager.GetTheme(themeName)
 	if err != nil {
 		return fmt.Errorf("failed to get theme: %w", err)
+	}
+
+	// Use default template if none specified
+	if templatePath == "" {
+		templatePath = cfg.DefaultTemplate
+		fmt.Printf("Using default template: %s\n", templatePath)
 	}
 
 	if !filepath.IsAbs(templatePath) {

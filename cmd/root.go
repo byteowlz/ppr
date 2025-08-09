@@ -29,4 +29,5 @@ func init() {
 	rootCmd.AddCommand(initConfigCmd)
 	rootCmd.AddCommand(setWallpaperCmd)
 	rootCmd.AddCommand(convertTemplateCmd)
+	rootCmd.AddCommand(batchConvertCmd)
 }

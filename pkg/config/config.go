@@ -14,6 +14,7 @@ type Config struct {
 	TemplatesPath    string `toml:"templates_path"`
 	OutputPath       string `toml:"output_path"`
 	DefaultTheme     string `toml:"default_theme"`
+	DefaultTemplate  string `toml:"default_template"`
 	DefaultWidth     int    `toml:"default_width"`
 	DefaultHeight    int    `toml:"default_height"`
 	AutoSetWallpaper bool   `toml:"auto_set_wallpaper"`
@@ -26,6 +27,7 @@ func DefaultConfig() *Config {
 		TemplatesPath:    filepath.Join(homeDir, ".config", "ppr", "templates"),
 		OutputPath:       filepath.Join(homeDir, "Pictures", "ppr"),
 		DefaultTheme:     "nord",
+		DefaultTemplate:  "geometric-simple.svg",
 		DefaultWidth:     1920,
 		DefaultHeight:    1080,
 		AutoSetWallpaper: false,
@@ -49,7 +51,8 @@ func Load() (*Config, error) {
 		return DefaultConfig(), nil
 	}
 
-	var config Config
+	// Start with default config and override with file values
+	config := *DefaultConfig()
 	if _, err := toml.DecodeFile(configPath, &config); err != nil {
 		return nil, fmt.Errorf("failed to decode config file: %w", err)
 	}

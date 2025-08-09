@@ -51,11 +51,11 @@ func runListTemplates(cmd *cobra.Command, args []string) error {
 			templatePath := filepath.Join(cfg.TemplatesPath, template)
 			info, err := os.Stat(templatePath)
 			if err != nil {
-				fmt.Printf("❌ %s (error: %v)\n", template, err)
+				fmt.Printf("ERROR %s (error: %v)\n", template, err)
 				continue
 			}
 
-			fmt.Printf("📄 %s\n", template)
+			fmt.Printf("%s\n", template)
 			fmt.Printf("   Size: %d bytes\n", info.Size())
 			fmt.Printf("   Modified: %s\n", info.ModTime().Format("2006-01-02 15:04:05"))
 			fmt.Println()

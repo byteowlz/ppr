@@ -4,12 +4,12 @@ PPR is a cross-platform CLI tool for creating themed wallpapers from SVG templat
 
 ## Features
 
-- 🎨 **Theme Support**: Works with base16 and base24 color schemes
-- 📐 **Custom Resolutions**: Generate wallpapers at any resolution
-- 🖥️ **Auto-Detection**: Automatically detects your display resolution
-- 🖼️ **Wallpaper Setting**: Cross-platform wallpaper setting (macOS, Linux, Windows)
-- 📄 **SVG Templates**: Use SVG templates with color placeholders
-- ⚙️ **Configurable**: TOML-based configuration system
+- **Theme Support**: Works with base16 and base24 color schemes
+- **Custom Resolutions**: Generate wallpapers at any resolution
+- **Auto-Detection**: Automatically detects your display resolution
+- **Wallpaper Setting**: Cross-platform wallpaper setting (macOS, Linux, Windows)
+- **SVG Templates**: Use SVG templates with color placeholders
+- **Configurable**: TOML-based configuration system
 
 ## Installation
 
