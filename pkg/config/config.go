@@ -10,27 +10,35 @@ import (
 )
 
 type Config struct {
-	ThemesPath       string `toml:"themes_path"`
-	TemplatesPath    string `toml:"templates_path"`
-	OutputPath       string `toml:"output_path"`
-	DefaultTheme     string `toml:"default_theme"`
-	DefaultTemplate  string `toml:"default_template"`
-	DefaultWidth     int    `toml:"default_width"`
-	DefaultHeight    int    `toml:"default_height"`
-	AutoSetWallpaper bool   `toml:"auto_set_wallpaper"`
+	ThemesPath         string   `toml:"themes_path"`
+	TemplatesPath      string   `toml:"templates_path"`
+	OutputPath         string   `toml:"output_path"`
+	DefaultTheme       string   `toml:"default_theme"`
+	DefaultTemplate    string   `toml:"default_template"`
+	DefaultWidth       int      `toml:"default_width"`
+	DefaultHeight      int      `toml:"default_height"`
+	AutoSetWallpaper   bool     `toml:"auto_set_wallpaper"`
+	CurrentTheme       string   `toml:"current_theme"`
+	CurrentTemplate    string   `toml:"current_template"`
+	LastOutputPath     string   `toml:"last_output_path"`
+	PreferredTemplates []string `toml:"preferred_templates"`
 }
 
 func DefaultConfig() *Config {
 	homeDir, _ := os.UserHomeDir()
 	return &Config{
-		ThemesPath:       filepath.Join(homeDir, ".config", "ppr", "themes"),
-		TemplatesPath:    filepath.Join(homeDir, ".config", "ppr", "templates"),
-		OutputPath:       filepath.Join(homeDir, "Pictures", "ppr"),
-		DefaultTheme:     "nord",
-		DefaultTemplate:  "geometric-simple.svg",
-		DefaultWidth:     1920,
-		DefaultHeight:    1080,
-		AutoSetWallpaper: false,
+		ThemesPath:         filepath.Join(homeDir, ".config", "ppr", "themes"),
+		TemplatesPath:      filepath.Join(homeDir, ".config", "ppr", "templates"),
+		OutputPath:         filepath.Join(homeDir, "Pictures", "ppr"),
+		DefaultTheme:       "nord",
+		DefaultTemplate:    "geometric-simple.svg",
+		DefaultWidth:       1920,
+		DefaultHeight:      1080,
+		AutoSetWallpaper:   false,
+		CurrentTheme:       "",
+		CurrentTemplate:    "",
+		LastOutputPath:     "",
+		PreferredTemplates: []string{"all"},
 	}
 }
 

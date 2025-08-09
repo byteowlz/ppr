@@ -30,4 +30,6 @@ func init() {
 	rootCmd.AddCommand(setWallpaperCmd)
 	rootCmd.AddCommand(convertTemplateCmd)
 	rootCmd.AddCommand(batchConvertCmd)
+	rootCmd.AddCommand(switchCurrentCmd)
+	rootCmd.AddCommand(cycleCmd)
 }

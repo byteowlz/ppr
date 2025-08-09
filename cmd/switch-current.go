@@ -14,38 +14,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generate a themed wallpaper from an SVG template",
-	Long: `Generate a themed wallpaper by applying a color theme to an SVG template.
-The output will be a PNG file with the specified or auto-detected resolution.
-If no template is specified, the default template from config will be used.`,
-	RunE: runGenerate,
+var switchCurrentCmd = &cobra.Command{
+	Use:   "switch-current [theme-name]",
+	Short: "Switch the color scheme of the currently used template",
+	Long: `Switch the color scheme of the currently used template to a new theme.
+This command uses the last generated template and applies a new color theme to it.
+If no current template is found, it will use the default template from config.`,
+	Args: cobra.ExactArgs(1),
+	RunE: runSwitchCurrent,
 }
 
 var (
-	themeName      string
-	templatePath   string
-	outputPath     string
-	resolutionStr  string
-	setWallpaper   bool
-	outputFilename string
-	outputSVG      bool
+	switchSetWallpaper   bool
+	switchOutputPath     string
+	switchOutputFilename string
+	switchResolutionStr  string
+	switchOutputSVG      bool
 )
 
 func init() {
-	generateCmd.Flags().StringVarP(&themeName, "theme", "t", "", "Theme name to apply")
-	generateCmd.Flags().StringVarP(&templatePath, "template", "s", "", "Path to SVG template file (uses default template if not specified)")
-	generateCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Output directory (optional)")
-	generateCmd.Flags().StringVarP(&resolutionStr, "resolution", "r", "", "Output resolution (e.g., 1920x1080)")
-	generateCmd.Flags().BoolVarP(&setWallpaper, "set-wallpaper", "w", false, "Set generated image as wallpaper")
-	generateCmd.Flags().StringVarP(&outputFilename, "filename", "f", "", "Output filename (optional)")
-	generateCmd.Flags().BoolVar(&outputSVG, "svg", false, "Output SVG file instead of PNG (for Illustrator compatibility)")
-
-	generateCmd.MarkFlagRequired("theme")
+	switchCurrentCmd.Flags().BoolVarP(&switchSetWallpaper, "set-wallpaper", "w", false, "Set generated image as wallpaper")
+	switchCurrentCmd.Flags().StringVarP(&switchOutputPath, "output", "o", "", "Output directory (optional)")
+	switchCurrentCmd.Flags().StringVarP(&switchOutputFilename, "filename", "f", "", "Output filename (optional)")
+	switchCurrentCmd.Flags().StringVarP(&switchResolutionStr, "resolution", "r", "", "Output resolution (e.g., 1920x1080)")
+	switchCurrentCmd.Flags().BoolVar(&switchOutputSVG, "svg", false, "Output SVG file instead of PNG")
 }
 
-func runGenerate(cmd *cobra.Command, args []string) error {
+func runSwitchCurrent(cmd *cobra.Command, args []string) error {
+	newThemeName := args[0]
+
 	cfg, err := config.Load()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
@@ -55,22 +52,27 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to ensure directories: %w", err)
 	}
 
+	// Determine which template to use
+	templateToUse := cfg.CurrentTemplate
+	if templateToUse == "" {
+		templateToUse = cfg.DefaultTemplate
+		fmt.Printf("No current template found, using default: %s\n", templateToUse)
+	} else {
+		fmt.Printf("Using current template: %s\n", templateToUse)
+	}
+
 	themeManager := theme.NewThemeManager(cfg.ThemesPath)
 	if err := themeManager.LoadThemes(); err != nil {
 		return fmt.Errorf("failed to load themes: %w", err)
 	}
 
-	selectedTheme, err := themeManager.GetTheme(themeName)
+	selectedTheme, err := themeManager.GetTheme(newThemeName)
 	if err != nil {
 		return fmt.Errorf("failed to get theme: %w", err)
 	}
 
-	// Use default template if none specified
-	if templatePath == "" {
-		templatePath = cfg.DefaultTemplate
-		fmt.Printf("Using default template: %s\n", templatePath)
-	}
-
+	// Build full template path
+	templatePath := templateToUse
 	if !filepath.IsAbs(templatePath) {
 		templatePath = filepath.Join(cfg.TemplatesPath, templatePath)
 	}
@@ -87,8 +89,8 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	var res *resolution.Resolution
-	if resolutionStr != "" {
-		res, err = resolution.ParseResolution(resolutionStr)
+	if switchResolutionStr != "" {
+		res, err = resolution.ParseResolution(switchResolutionStr)
 		if err != nil {
 			return fmt.Errorf("failed to parse resolution: %w", err)
 		}
@@ -102,23 +104,23 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	outputDir := cfg.OutputPath
-	if outputPath != "" {
-		outputDir = outputPath
+	if switchOutputPath != "" {
+		outputDir = switchOutputPath
 	}
 
-	filename := outputFilename
+	filename := switchOutputFilename
 	if filename == "" {
 		timestamp := time.Now().Format("20060102-150405")
-		if outputSVG {
-			filename = fmt.Sprintf("%s-%s-%s.svg", themeName, filepath.Base(templatePath), timestamp)
+		if switchOutputSVG {
+			filename = fmt.Sprintf("%s-%s-%s.svg", newThemeName, filepath.Base(templatePath), timestamp)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s.png", themeName, filepath.Base(templatePath), timestamp)
+			filename = fmt.Sprintf("%s-%s-%s.png", newThemeName, filepath.Base(templatePath), timestamp)
 		}
 	}
 
 	finalOutputPath := filepath.Join(outputDir, filename)
 
-	if outputSVG {
+	if switchOutputSVG {
 		// Write SVG directly with resolved colors
 		if err := processor.WriteSVG(svgContent, finalOutputPath); err != nil {
 			return fmt.Errorf("failed to write SVG: %w", err)
@@ -129,10 +131,10 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, finalOutputPath); err != nil {
 			return fmt.Errorf("failed to generate wallpaper: %w", err)
 		}
-		fmt.Printf("Generated wallpaper: %s (%s)\n", finalOutputPath, res.String())
+		fmt.Printf("Switched to theme '%s': %s (%s)\n", newThemeName, finalOutputPath, res.String())
 	}
 
-	if setWallpaper || cfg.AutoSetWallpaper {
+	if switchSetWallpaper || cfg.AutoSetWallpaper {
 		setter := wallpaper.NewSetter()
 		if err := setter.SetWallpaper(finalOutputPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
@@ -142,7 +144,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Update current state in config
-	cfg.CurrentTheme = themeName
+	cfg.CurrentTheme = newThemeName
 	cfg.CurrentTemplate = filepath.Base(templatePath)
 	cfg.LastOutputPath = finalOutputPath
 	if err := cfg.Save(); err != nil {
