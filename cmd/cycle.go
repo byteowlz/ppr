@@ -17,11 +17,12 @@ import (
 
 var cycleCmd = &cobra.Command{
 	Use:   "cycle [theme-name]",
-	Short: "Cycle through preferred templates with a theme",
-	Long: `Cycle through the preferred templates configured in config.toml.
+	Short: "Cycle through preferred templates and set as wallpaper",
+	Long: `Cycle through the preferred templates configured in config.toml and set as wallpaper.
 If preferred_templates contains "all", it will cycle through all available templates.
 Otherwise, it cycles through the specified list of preferred templates.
-Uses the current theme if no theme is specified.`,
+Uses the current theme if no theme is specified.
+The wallpaper is set automatically by default.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runCycle,
 }
@@ -35,7 +36,7 @@ var (
 )
 
 func init() {
-	cycleCmd.Flags().BoolVarP(&cycleSetWallpaper, "set-wallpaper", "w", false, "Set generated image as wallpaper")
+	cycleCmd.Flags().BoolVarP(&cycleSetWallpaper, "set-wallpaper", "w", true, "Set generated image as wallpaper (default: true)")
 	cycleCmd.Flags().StringVarP(&cycleOutputPath, "output", "o", "", "Output directory (optional)")
 	cycleCmd.Flags().StringVarP(&cycleOutputFilename, "filename", "f", "", "Output filename (optional)")
 	cycleCmd.Flags().StringVarP(&cycleResolutionStr, "resolution", "r", "", "Output resolution (e.g., 1920x1080)")
@@ -149,7 +150,8 @@ func runCycle(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Cycled to template '%s' with theme '%s': %s (%s)\n", nextTemplate, themeToUse, finalOutputPath, res.String())
 	}
 
-	if cycleSetWallpaper || cfg.AutoSetWallpaper {
+	// Always set wallpaper by default for cycle command, unless explicitly disabled
+	if cycleSetWallpaper {
 		setter := wallpaper.NewSetter()
 		if err := setter.SetWallpaper(finalOutputPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
