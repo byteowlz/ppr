@@ -1,8 +1,8 @@
 ![ppr_banner](ppr_logo_banner_black.png)
 
-# PPR - Programmable Palette Renderer
+# ppr
 
-PPR is a cross-platform CLI tool for creating themed wallpapers from SVG templates using base16/base24 color schemes.
+ppr is a cross-platform CLI tool for creating themed wallpapers from SVG templates using base16/base24 color schemes.
 
 ## Features
 
@@ -31,7 +31,7 @@ Download the latest binary from the [releases page](https://github.com/byteowlz/
 
 ## Quick Start
 
-1. **Initialize PPR**:
+1. **Initialize ppr**:
 
    ```bash
    ppr init
@@ -79,7 +79,7 @@ Download the latest binary from the [releases page](https://github.com/byteowlz/
 
 #### `ppr init`
 
-Initialize PPR configuration and create necessary directories.
+Initialize ppr configuration and create necessary directories.
 
 ```bash
 ppr init [--force]
@@ -127,6 +127,7 @@ ppr cycle [THEME_NAME]
 ```
 
 **Options:**
+
 - `--set-wallpaper, -w`: Set generated image as wallpaper (default: true)
 - `--output, -o`: Output directory (optional)
 - `--filename, -f`: Output filename (optional)
@@ -183,7 +184,7 @@ ppr generate --theme nord --template shapes --filename my-wallpaper.png
 
 ## Configuration
 
-PPR uses a TOML configuration file located at `~/.config/ppr/config.toml`:
+ppr uses a TOML configuration file located at `~/.config/ppr/config.toml`:
 
 ```toml
 themes_path = "/path/to/themes"
@@ -235,7 +236,7 @@ Base24 themes include additional colors `{{base10}}` through `{{base17}}`.
 
 ## Creating Custom Color Schemes
 
-PPR provides tools to easily create your own color schemes:
+ppr provides tools to easily create your own color schemes:
 
 ### Method 1: Extract from Visual SVG
 
@@ -265,6 +266,7 @@ ppr generate --theme nord --template base16-colors-template --filename nord-colo
 ```
 
 This creates a visual reference showing all 16 colors with their labels, perfect for:
+
 - Understanding color relationships in a theme
 - Creating color documentation
 - Sharing color palettes visually
@@ -281,7 +283,7 @@ The command automatically detects base colors (base00-base0F) from text labels a
 
 ### Example Files Included
 
-PPR includes several example files to get you started:
+ppr includes several example files to get you started:
 
 - **`example/example.svg`**: Nord color palette in simple format - perfect for copying and modifying
 - **`example/dmg_dark.svg`**: Same Nord colors in complex CSS format - demonstrates compatibility
@@ -302,7 +304,7 @@ ppr generate --theme catppuccin-mocha --template base16-colors-template --filena
 
 ## Themes
 
-PPR supports themes from the [base16](https://github.com/chriskempson/base16) and [base24](https://github.com/Base24/base24) projects. Place theme YAML files in:
+ppr supports themes from the [base16](https://github.com/chriskempson/base16) and [base24](https://github.com/Base24/base24) projects. Place theme YAML files in:
 
 ```
 ~/.config/ppr/themes/
@@ -362,6 +364,7 @@ ppr cycle --set-wallpaper=false
 ```
 
 The cycle command:
+
 - Automatically moves to the next template in your preferred list
 - Sets the wallpaper by default (can be disabled)
 - Remembers the current position for seamless cycling
