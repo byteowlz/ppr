@@ -164,3 +164,62 @@ func (tm *ThemeManager) ListThemes() []string {
 func (tm *ThemeManager) GetThemeInfo(name string) (*Theme, error) {
 	return tm.GetTheme(name)
 }
+
+func (tm *ThemeManager) SaveTheme(theme *Theme) error {
+	// Determine the directory based on the theme system
+	var themeDir string
+	if theme.System == "base24" {
+		themeDir = filepath.Join(tm.themesPath, "base24")
+	} else {
+		themeDir = filepath.Join(tm.themesPath, "base16")
+	}
+
+	// Ensure the directory exists
+	if err := os.MkdirAll(themeDir, 0755); err != nil {
+		return fmt.Errorf("failed to create theme directory: %w", err)
+	}
+
+	// Create properly formatted YAML content
+	data, err := tm.formatThemeYAML(theme)
+	if err != nil {
+		return fmt.Errorf("failed to format theme: %w", err)
+	}
+
+	// Write to file
+	filename := fmt.Sprintf("%s.yaml", theme.Name)
+	themePath := filepath.Join(themeDir, filename)
+
+	if err := os.WriteFile(themePath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write theme file: %w", err)
+	}
+
+	// Add to in-memory themes map
+	tm.themes[theme.Name] = theme
+
+	return nil
+}
+
+func (tm *ThemeManager) formatThemeYAML(theme *Theme) ([]byte, error) {
+	var result strings.Builder
+
+	// Write header fields with proper quotes
+	result.WriteString(fmt.Sprintf("system: \"%s\"\n", theme.System))
+	result.WriteString(fmt.Sprintf("name: \"%s\"\n", theme.Name))
+	result.WriteString(fmt.Sprintf("author: \"%s\"\n", theme.Author))
+	result.WriteString(fmt.Sprintf("variant: \"%s\"\n", theme.Variant))
+	result.WriteString("palette:\n")
+
+	// Write palette colors in correct order with proper indentation
+	baseOrder := []string{
+		"base00", "base01", "base02", "base03", "base04", "base05", "base06", "base07",
+		"base08", "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F",
+	}
+
+	for _, base := range baseOrder {
+		if color, exists := theme.Palette[base]; exists {
+			result.WriteString(fmt.Sprintf("  %s: \"%s\"\n", base, color))
+		}
+	}
+
+	return []byte(result.String()), nil
+}

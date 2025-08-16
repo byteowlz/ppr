@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <!-- Background -->
+  <rect width="800" height="520" fill="{{base00}}"/>
+  
+  <!-- Grid config: 4 columns x 4 rows -->
+  <!-- Each cell: tile 120x120 (square 100x100 centered), label below -->
+
+  <!-- Row 1 -->
+  <g transform="translate(20,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base00}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base00</text>
+  </g>
+
+  <g transform="translate(160,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base01}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base01</text>
+  </g>
+
+  <g transform="translate(300,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base02}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base02</text>
+  </g>
+
+  <g transform="translate(440,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base03}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base03</text>
+  </g>
+
+  <!-- Row 2 -->
+  <g transform="translate(20,180)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base04}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base04</text>
+  </g>
+
+  <g transform="translate(160,180)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base05}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base05</text>
+  </g>
+
+  <g transform="translate(300,180)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base06}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base06</text>
+  </g>
+
+  <g transform="translate(440,180)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base07}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base07</text>
+  </g>
+
+  <!-- Row 3 -->
+  <g transform="translate(20,340)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base08}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base08</text>
+  </g>
+
+  <g transform="translate(160,340)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base09}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base09</text>
+  </g>
+
+  <g transform="translate(300,340)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0A}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0A</text>
+  </g>
+
+  <g transform="translate(440,340)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0B}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0B</text>
+  </g>
+
+  <!-- Row 4 -->
+  <g transform="translate(580,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0C}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0C</text>
+  </g>
+
+  <g transform="translate(580,180)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0D}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0D</text>
+  </g>
+
+  <g transform="translate(580,340)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0E}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0E</text>
+  </g>
+
+  <g transform="translate(720,20)">
+    <rect width="120" height="120" rx="8" ry="8" fill="{{base02}}"/>
+    <rect x="10" y="10" width="100" height="100" fill="{{base0F}}"/>
+    <text x="10" y="145" font-family="sans-serif" font-size="14" fill="{{base05}}">base0F</text>
+  </g>
+</svg>

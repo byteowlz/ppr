@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 864.8 520">
+  <!-- Generator: Adobe Illustrator 29.6.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 9)  -->
+  <defs>
+    <style>
+      .st0, .st1 {
+        fill: #e8da8b;
+      }
+
+      .st1, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10, .st11, .st12, .st13, .st14, .st15, .st16 {
+        font-family: Helvetica, Helvetica;
+        font-size: 14px;
+        isolation: isolate;
+      }
+
+      .st17, .st14 {
+        fill: #343636;
+      }
+
+      .st2, .st18 {
+        fill: #5b5c98;
+      }
+
+      .st19, .st16 {
+        fill: #9db834;
+      }
+
+      .st3, .st20 {
+        fill: #c45f8f;
+      }
+
+      .st21, .st13 {
+        fill: #8fbcbb;
+      }
+
+      .st22, .st5 {
+        fill: #677393;
+      }
+
+      .st4, .st23 {
+        fill: #7ea22b;
+      }
+
+      .st24, .st10 {
+        fill: #2a5240;
+      }
+
+      .st6, .st25 {
+        fill: #d9d5d2;
+      }
+
+      .st7, .st26 {
+        fill: #91507b;
+      }
+
+      .st27, .st9 {
+        fill: #ac376a;
+      }
+
+      .st8, .st28 {
+        fill: #cfcac7;
+      }
+
+      .st29, .st15 {
+        fill: #e2dfdd;
+      }
+
+      .st11, .st30 {
+        fill: #7d8391;
+      }
+
+      .st31, .st12 {
+        fill: #527c36;
+      }
+    </style>
+  </defs>
+  <g>
+    <rect class="st17" x="20" y="20" width="120" height="120"/>
+    <rect class="st17" x="30" y="30" width="100" height="100"/>
+    <text class="st14" transform="translate(30 165)"><tspan x="0" y="0">base00 - #2E3440</tspan></text>
+  </g>
+  <g>
+    <rect class="st24" x="160" y="20" width="120" height="120"/>
+    <rect class="st24" x="170" y="30" width="100" height="100"/>
+    <text class="st10" transform="translate(170 165)"><tspan x="0" y="0">base01 - #3B4252</tspan></text>
+  </g>
+  <g>
+    <rect class="st31" x="300" y="20" width="120" height="120"/>
+    <rect class="st31" x="310" y="30" width="100" height="100"/>
+    <text class="st12" transform="translate(310 165)"><tspan x="0" y="0">base02 - #434C5E</tspan></text>
+  </g>
+  <g>
+    <rect class="st23" x="440" y="20" width="120" height="120"/>
+    <rect class="st23" x="450" y="30" width="100" height="100"/>
+    <text class="st4" transform="translate(450 165)"><tspan x="0" y="0">base03 - #4C566A</tspan></text>
+  </g>
+  <g>
+    <rect class="st28" x="20" y="180" width="120" height="120"/>
+    <rect class="st28" x="30" y="190" width="100" height="100"/>
+    <text class="st8" transform="translate(30 325)"><tspan x="0" y="0">base04 - #D8DEE9</tspan></text>
+  </g>
+  <g>
+    <rect class="st25" x="160" y="180" width="120" height="120"/>
+    <rect class="st25" x="170" y="190" width="100" height="100"/>
+    <text class="st6" transform="translate(170 325)"><tspan x="0" y="0">base05 - #E5E9F0</tspan></text>
+  </g>
+  <g>
+    <rect class="st29" x="300" y="180" width="120" height="120"/>
+    <rect class="st29" x="310" y="190" width="100" height="100"/>
+    <text class="st15" transform="translate(310 325)"><tspan x="0" y="0">base06 - #ECEFF4</tspan></text>
+  </g>
+  <g>
+    <rect class="st30" x="440" y="180" width="120" height="120"/>
+    <rect class="st30" x="450" y="190" width="100" height="100"/>
+    <text class="st11" transform="translate(450 325)"><tspan x="0" y="0">base07 - #8FBCBB</tspan></text>
+  </g>
+  <g>
+    <rect class="st27" x="20" y="340" width="120" height="120"/>
+    <rect class="st27" x="30" y="350" width="100" height="100"/>
+    <text class="st9" transform="translate(30 485)"><tspan x="0" y="0">base08 - #BF616A</tspan></text>
+  </g>
+  <g>
+    <rect class="st26" x="160" y="340" width="120" height="120"/>
+    <rect class="st26" x="170" y="350" width="100" height="100"/>
+    <text class="st7" transform="translate(170 485)"><tspan x="0" y="0">base09 - #D08770</tspan></text>
+  </g>
+  <g>
+    <rect class="st0" x="300" y="340" width="120" height="120"/>
+    <rect class="st0" x="310" y="350" width="100" height="100"/>
+    <text class="st1" transform="translate(310 485)"><tspan x="0" y="0">base0A - #EBCB8B</tspan></text>
+  </g>
+  <g>
+    <rect class="st19" x="440" y="340" width="120" height="120"/>
+    <rect class="st19" x="450" y="350" width="100" height="100"/>
+    <text class="st16" transform="translate(450 485)"><tspan x="0" y="0">base0B - #A3BE8C</tspan></text>
+  </g>
+  <g>
+    <rect class="st21" x="580" y="20" width="120" height="120"/>
+    <rect class="st21" x="590" y="30" width="100" height="100"/>
+    <text class="st13" transform="translate(590 165)"><tspan x="0" y="0">base0C - #88C0D0</tspan></text>
+  </g>
+  <g>
+    <rect class="st22" x="580" y="180" width="120" height="120"/>
+    <rect class="st22" x="590" y="190" width="100" height="100"/>
+    <text class="st5" transform="translate(590 325)"><tspan x="0" y="0">base0D - #81A1C1</tspan></text>
+  </g>
+  <g>
+    <rect class="st20" x="580" y="340" width="120" height="120"/>
+    <rect class="st20" x="590" y="350" width="100" height="100"/>
+    <text class="st3" transform="translate(590 485)"><tspan x="0" y="0">base0E - #B48EAD</tspan></text>
+  </g>
+  <g>
+    <rect class="st18" x="720" y="20" width="120" height="120"/>
+    <rect class="st18" x="730" y="30" width="100" height="100"/>
+    <text class="st2" transform="translate(730 165)"><tspan x="0" y="0">base0F - #5E81AC</tspan></text>
+  </g>
+</svg>
