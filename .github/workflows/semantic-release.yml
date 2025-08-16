@@ -1,4 +1,4 @@
-name: Semantic Release
+name: Release
 
 on:
   push:
@@ -11,8 +11,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  semantic-release:
+  release:
     runs-on: ubuntu-latest
+    outputs:
+      new-release-published: ${{ steps.semantic-release.outputs.new-release-published }}
+      new-release-version: ${{ steps.semantic-release.outputs.new-release-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,9 +30,35 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github conventional-changelog-conventionalcommits
+          npm install -g semantic-release @semantic-release/changelog @semantic-release/git conventional-changelog-conventionalcommits
 
-      - name: Release
+      - name: Semantic Release
+        id: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
-        run: semantic-release
+        run: |
+          npx semantic-release --dry-run > /tmp/semantic-release.log 2>&1 || true
+          if npx semantic-release; then
+            echo "new-release-published=true" >> $GITHUB_OUTPUT
+            echo "new-release-version=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          else
+            echo "new-release-published=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Go
+        if: steps.semantic-release.outputs.new-release-published == 'true'
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Run GoReleaser
+        if: steps.semantic-release.outputs.new-release-published == 'true'
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          AUR_KEY: ${{ secrets.AUR_KEY }}
