@@ -1,0 +1,121 @@
+project_name: ppr
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: ppr
+    main: .
+    binary: ppr
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: ppr
+    builds:
+      - ppr
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "^style:"
+      - "^refactor:"
+
+brews:
+  - name: ppr
+    homepage: "https://github.com/byteowlz/ppr"
+    description: "ppr - CLI tool for creating themed wallpapers from SVG templates"
+    license: "MIT"
+    repository:
+      owner: byteowlz
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    test: |
+      system "#{bin}/ppr version"
+    install: |
+      bin.install "ppr"
+
+aurs:
+  - name: ppr-bin
+    homepage: "https://github.com/byteowlz/ppr"
+    description: "ppr - CLI tool for creating themed wallpapers from SVG templates (binary)"
+    maintainers:
+      - "Tommy Falkowski <tommy@byteowlz.com>"
+    license: "MIT"
+    private_key: "{{ .Env.AUR_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/ppr-bin.git"
+    package: |-
+      # bin
+      install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
+      # license
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+
+  - name: ppr
+    homepage: "https://github.com/byteowlz/ppr"
+    description: "ppr - CLI tool for creating themed wallpapers from SVG templates"
+    maintainers:
+      - "Tommy Falkowski <tommy@byteowlz.com>"
+    license: "MIT"
+    private_key: "{{ .Env.AUR_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/ppr.git"
+    depends:
+      - go
+    package: |-
+      cd "$srcdir"
+      export CGO_ENABLED=0
+      export GOOS=linux
+      go build \
+        -trimpath \
+        -buildmode=pie \
+        -mod=readonly \
+        -modcacherw \
+        -ldflags "-linkmode external -extldflags \"$LDFLAGS\" -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}" \
+        -o ppr .
+
+      # bin
+      install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
+      # license
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+
+release:
+  github:
+    owner: byteowlz
+    name: ppr
+  draft: false
+  prerelease: auto
+  name_template: "Release {{.Version}}"
