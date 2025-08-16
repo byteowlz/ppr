@@ -119,11 +119,13 @@ func runCycle(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Determine output directory - use same approach as switch-current
 	outputDir := cfg.OutputPath
 	if cycleOutputPath != "" {
 		outputDir = cycleOutputPath
 	}
 
+	// Generate filename like switch-current does
 	filename := cycleOutputFilename
 	if filename == "" {
 		timestamp := time.Now().Format("20060102-150405")
@@ -134,26 +136,27 @@ func runCycle(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	finalOutputPath := filepath.Join(outputDir, filename)
+	// Create the wallpaper file directly in output directory (like switch-current)
+	wallpaperPath := filepath.Join(outputDir, filename)
 
 	if cycleOutputSVG {
 		// Write SVG directly with resolved colors
-		if err := processor.WriteSVG(svgContent, finalOutputPath); err != nil {
+		if err := processor.WriteSVG(svgContent, wallpaperPath); err != nil {
 			return fmt.Errorf("failed to write SVG: %w", err)
 		}
-		fmt.Printf("Generated SVG: %s\n", finalOutputPath)
+		fmt.Printf("Generated SVG: %s\n", wallpaperPath)
 	} else {
 		generator := image.NewGenerator()
-		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, finalOutputPath); err != nil {
+		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, wallpaperPath); err != nil {
 			return fmt.Errorf("failed to generate wallpaper: %w", err)
 		}
-		fmt.Printf("Cycled to template '%s' with theme '%s': %s (%s)\n", nextTemplate, themeToUse, finalOutputPath, res.String())
+		fmt.Printf("Cycled to template '%s' with theme '%s': %s (%s)\n", nextTemplate, themeToUse, wallpaperPath, res.String())
 	}
 
 	// Always set wallpaper by default for cycle command, unless explicitly disabled
 	if cycleSetWallpaper {
 		setter := wallpaper.NewSetter()
-		if err := setter.SetWallpaper(finalOutputPath); err != nil {
+		if err := setter.SetWallpaper(wallpaperPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
 		} else {
 			fmt.Println("Wallpaper set successfully!")
@@ -163,7 +166,7 @@ func runCycle(cmd *cobra.Command, args []string) error {
 	// Update current state in config
 	cfg.CurrentTheme = themeToUse
 	cfg.CurrentTemplate = filepath.Base(nextTemplate)
-	cfg.LastOutputPath = finalOutputPath
+	cfg.LastOutputPath = wallpaperPath
 	if err := cfg.Save(); err != nil {
 		fmt.Printf("Warning: failed to save current state: %v\n", err)
 	}

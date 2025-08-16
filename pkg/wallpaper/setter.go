@@ -2,8 +2,10 @@ package wallpaper
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 type Setter struct{}
@@ -26,13 +28,66 @@ func (s *Setter) SetWallpaper(imagePath string) error {
 }
 
 func (s *Setter) setMacOSWallpaper(imagePath string) error {
-	script := fmt.Sprintf(`tell application "Finder" to set desktop picture to POSIX file "%s"`, imagePath)
-	cmd := exec.Command("osascript", "-e", script)
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to set macOS wallpaper: %w", err)
+	// Check if file exists and is readable
+	if _, err := os.Stat(imagePath); err != nil {
+		return fmt.Errorf("wallpaper file not accessible: %w", err)
 	}
 
+	// Method 1: Try using System Events for all desktops
+	script := fmt.Sprintf(`tell application "System Events"
+		tell every desktop
+			set picture to "%s"
+		end tell
+	end tell`, imagePath)
+
+	cmd := exec.Command("osascript", "-e", script)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		fmt.Printf("System Events method failed: %s\n", string(output))
+
+		// Method 2: Fallback to Finder method with POSIX file
+		script2 := fmt.Sprintf(`tell application "Finder" to set desktop picture to POSIX file "%s"`, imagePath)
+		cmd2 := exec.Command("osascript", "-e", script2)
+		output2, err2 := cmd2.CombinedOutput()
+
+		if err2 != nil {
+			fmt.Printf("Finder method failed: %s\n", string(output2))
+			return fmt.Errorf("both AppleScript methods failed: Finder error: %w, System Events error: %v", err2, err)
+		}
+	}
+
+	// Force desktop refresh
+	refreshCmd := exec.Command("osascript", "-e", `tell application "Finder" to activate`)
+	refreshCmd.Run()
+
+	// Verify the wallpaper was set by checking current desktop picture
+	if err := s.verifyWallpaperSet(imagePath); err != nil {
+		fmt.Printf("Warning: wallpaper verification failed: %v\n", err)
+	}
+
+	return nil
+}
+
+func (s *Setter) verifyWallpaperSet(expectedPath string) error {
+	// Get current desktop picture path
+	cmd := exec.Command("osascript", "-e", `tell application "System Events" to get picture of first desktop`)
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to get current desktop picture: %w", err)
+	}
+
+	currentPath := string(output)
+	currentPath = strings.TrimSpace(currentPath)
+
+	// Remove any quotes that might be around the path
+	currentPath = strings.Trim(currentPath, "\"")
+
+	if currentPath != expectedPath {
+		return fmt.Errorf("wallpaper verification failed: expected %s, got %s", expectedPath, currentPath)
+	}
+
+	fmt.Printf("Wallpaper verification successful: %s\n", currentPath)
 	return nil
 }
 
