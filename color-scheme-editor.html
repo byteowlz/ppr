@@ -201,21 +201,52 @@
             padding: 8px 16px;
             font-size: 12px;
         }
+
+        .mode-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .mode-toggle button {
+            margin: 0 5px;
+        }
+
+        .mode-toggle button.active {
+            background: #0088ff;
+        }
+
+        .base24-section {
+            border-top: 2px solid #3a3a3a;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+
+        .base24-section h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 PPR Color Scheme Editor</h1>
+        <h1>PPR Color Scheme Editor</h1>
         
         <div class="instructions">
             <h3>How to Use</h3>
             <ol>
+                <li>Choose Base16 (16 colors) or Base24 (24 colors) mode</li>
                 <li>Click on any color swatch to change it</li>
                 <li>Try preset color schemes or create your own</li>
                 <li>Click "Generate Theme YAML" to create the theme file</li>
-                <li>Copy the YAML and save it as <code>your-theme.yaml</code> in <code>~/.config/themes/base16/</code></li>
+                <li>Copy the YAML and save it as <code>your-theme.yaml</code> in <code>~/.config/themes/base16/</code> or <code>~/.config/themes/base24/</code></li>
                 <li>Use your theme: <code>ppr generate -t your-theme -s shapes --set-wallpaper</code></li>
             </ol>
+        </div>
+
+        <div class="mode-toggle">
+            <button id="base16Btn" class="active" onclick="setMode('base16')">Base16 (16 colors)</button>
+            <button id="base24Btn" onclick="setMode('base24')">Base24 (24 colors)</button>
         </div>
 
         <div class="preset-buttons">
@@ -228,6 +259,11 @@
         </div>
 
         <div class="grid" id="colorGrid"></div>
+        
+        <div id="base24Section" class="base24-section" style="display: none;">
+            <h3>Base24 Extended Colors</h3>
+            <div class="grid" id="base24Grid"></div>
+        </div>
 
         <div class="controls">
             <button onclick="generateTheme()">Generate Theme YAML</button>
@@ -242,11 +278,16 @@
     </div>
 
     <script>
+        let currentMode = 'base16';
+        
         const colorScheme = {
             base00: '#2E3440', base01: '#3B4252', base02: '#434C5E', base03: '#4C566A',
             base04: '#D8DEE9', base05: '#E5E9F0', base06: '#ECEFF4', base07: '#8FBCBB',
             base08: '#BF616A', base09: '#D08770', base0A: '#EBCB8B', base0B: '#A3BE8C',
-            base0C: '#88C0D0', base0D: '#81A1C1', base0E: '#B48EAD', base0F: '#5E81AC'
+            base0C: '#88C0D0', base0D: '#81A1C1', base0E: '#B48EAD', base0F: '#5E81AC',
+            // Base24 extended colors
+            base10: '#BF616A', base11: '#D08770', base12: '#EBCB8B', base13: '#A3BE8C',
+            base14: '#88C0D0', base15: '#81A1C1', base16: '#B48EAD', base17: '#5E81AC'
         };
 
         const colorDescriptions = {
@@ -265,7 +306,16 @@
             base0C: 'Cyan',
             base0D: 'Blue',
             base0E: 'Purple',
-            base0F: 'Brown'
+            base0F: 'Brown',
+            // Base24 extended descriptions
+            base10: 'Alt Red',
+            base11: 'Alt Orange',
+            base12: 'Alt Yellow',
+            base13: 'Alt Green',
+            base14: 'Alt Cyan',
+            base15: 'Alt Blue',
+            base16: 'Alt Purple',
+            base17: 'Alt Brown'
         };
 
         const presets = {
@@ -273,31 +323,41 @@
                 base00: '#2E3440', base01: '#3B4252', base02: '#434C5E', base03: '#4C566A',
                 base04: '#D8DEE9', base05: '#E5E9F0', base06: '#ECEFF4', base07: '#8FBCBB',
                 base08: '#BF616A', base09: '#D08770', base0A: '#EBCB8B', base0B: '#A3BE8C',
-                base0C: '#88C0D0', base0D: '#81A1C1', base0E: '#B48EAD', base0F: '#5E81AC'
+                base0C: '#88C0D0', base0D: '#81A1C1', base0E: '#B48EAD', base0F: '#5E81AC',
+                base10: '#B48EAD', base11: '#D08770', base12: '#EBCB8B', base13: '#A3BE8C',
+                base14: '#88C0D0', base15: '#81A1C1', base16: '#5E81AC', base17: '#BF616A'
             },
             gruvbox: {
                 base00: '#282828', base01: '#3c3836', base02: '#504945', base03: '#665c54',
                 base04: '#bdae93', base05: '#d5c4a1', base06: '#ebdbb2', base07: '#fbf1c7',
                 base08: '#fb4934', base09: '#fe8019', base0A: '#fabd2f', base0B: '#b8bb26',
-                base0C: '#8ec07c', base0D: '#83a598', base0E: '#d3869b', base0F: '#d65d0e'
+                base0C: '#8ec07c', base0D: '#83a598', base0E: '#d3869b', base0F: '#d65d0e',
+                base10: '#cc241d', base11: '#d65d0e', base12: '#d79921', base13: '#98971a',
+                base14: '#689d6a', base15: '#458588', base16: '#b16286', base17: '#a89984'
             },
             catppuccin: {
                 base00: '#1e1e2e', base01: '#181825', base02: '#313244', base03: '#45475a',
                 base04: '#585b70', base05: '#cdd6f4', base06: '#f5e0dc', base07: '#b4befe',
                 base08: '#f38ba8', base09: '#fab387', base0A: '#f9e2af', base0B: '#a6e3a1',
-                base0C: '#94e2d5', base0D: '#89b4fa', base0E: '#cba6f7', base0F: '#f2cdcd'
+                base0C: '#94e2d5', base0D: '#89b4fa', base0E: '#cba6f7', base0F: '#f2cdcd',
+                base10: '#eba0ac', base11: '#f9e2af', base12: '#f38ba8', base13: '#a6e3a1',
+                base14: '#89b4fa', base15: '#74c7ec', base16: '#cba6f7', base17: '#f2cdcd'
             },
             dracula: {
                 base00: '#282a36', base01: '#44475a', base02: '#44475a', base03: '#6272a4',
                 base04: '#6272a4', base05: '#f8f8f2', base06: '#f8f8f2', base07: '#f8f8f2',
                 base08: '#ff5555', base09: '#ffb86c', base0A: '#f1fa8c', base0B: '#50fa7b',
-                base0C: '#8be9fd', base0D: '#bd93f9', base0E: '#ff79c6', base0F: '#bd93f9'
+                base0C: '#8be9fd', base0D: '#bd93f9', base0E: '#ff79c6', base0F: '#bd93f9',
+                base10: '#ff6e6e', base11: '#ff79c6', base12: '#f1fa8c', base13: '#50fa7b',
+                base14: '#8be9fd', base15: '#6272a4', base16: '#bd93f9', base17: '#ffb86c'
             },
             'tokyo-night': {
                 base00: '#1a1b26', base01: '#16161e', base02: '#2f3549', base03: '#444b6a',
                 base04: '#787c99', base05: '#a9b1d6', base06: '#cbccd1', base07: '#d5d6db',
                 base08: '#f7768e', base09: '#ff9e64', base0A: '#e0af68', base0B: '#9ece6a',
-                base0C: '#73daca', base0D: '#7aa2f7', base0E: '#bb9af7', base0F: '#f7768e'
+                base0C: '#73daca', base0D: '#7aa2f7', base0E: '#bb9af7', base0F: '#f7768e',
+                base10: '#db4b4b', base11: '#ff9e64', base12: '#c0ca33', base13: '#9ece6a',
+                base14: '#2ac3de', base15: '#7aa2f7', base16: '#ad8ee6', base17: '#449dab'
             }
         };
 
@@ -317,9 +377,39 @@
 
         function renderColorGrid() {
             const grid = document.getElementById('colorGrid');
-            grid.innerHTML = Object.entries(colorScheme)
-                .map(([key, color]) => createColorCard(key, color))
-                .join('');
+            const base24Grid = document.getElementById('base24Grid');
+            
+            if (currentMode === 'base16') {
+                // Show only base00-base0F
+                const base16Colors = Object.entries(colorScheme)
+                    .filter(([key]) => key.match(/^base0[0-9A-F]$/))
+                    .map(([key, color]) => createColorCard(key, color))
+                    .join('');
+                grid.innerHTML = base16Colors;
+                document.getElementById('base24Section').style.display = 'none';
+            } else {
+                // Show base00-base0F in main grid
+                const base16Colors = Object.entries(colorScheme)
+                    .filter(([key]) => key.match(/^base0[0-9A-F]$/))
+                    .map(([key, color]) => createColorCard(key, color))
+                    .join('');
+                grid.innerHTML = base16Colors;
+                
+                // Show base10-base17 in extended grid
+                const base24Colors = Object.entries(colorScheme)
+                    .filter(([key]) => key.match(/^base1[0-7]$/))
+                    .map(([key, color]) => createColorCard(key, color))
+                    .join('');
+                base24Grid.innerHTML = base24Colors;
+                document.getElementById('base24Section').style.display = 'block';
+            }
+        }
+        
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('base16Btn').classList.toggle('active', mode === 'base16');
+            document.getElementById('base24Btn').classList.toggle('active', mode === 'base24');
+            renderColorGrid();
         }
 
         function changeColor(baseKey) {
@@ -338,7 +428,11 @@
         }
 
         function randomizeColors() {
-            Object.keys(colorScheme).forEach(key => {
+            const keysToRandomize = currentMode === 'base16' 
+                ? Object.keys(colorScheme).filter(key => key.match(/^base0[0-9A-F]$/))
+                : Object.keys(colorScheme);
+                
+            keysToRandomize.forEach(key => {
                 colorScheme[key] = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
             });
             renderColorGrid();
@@ -346,7 +440,10 @@
 
         function generateTheme() {
             const themeName = prompt('Enter theme name:', 'my-custom-theme') || 'my-custom-theme';
-            const yaml = `system: "base16"
+            const system = currentMode;
+            const themeDir = system;
+            
+            let yaml = `system: "${system}"
 name: "${themeName}"
 author: "custom"
 variant: "dark"
@@ -368,13 +465,25 @@ palette:
   base0E: "${colorScheme.base0E}"
   base0F: "${colorScheme.base0F}"`;
 
+            if (currentMode === 'base24') {
+                yaml += `
+  base10: "${colorScheme.base10}"
+  base11: "${colorScheme.base11}"
+  base12: "${colorScheme.base12}"
+  base13: "${colorScheme.base13}"
+  base14: "${colorScheme.base14}"
+  base15: "${colorScheme.base15}"
+  base16: "${colorScheme.base16}"
+  base17: "${colorScheme.base17}"`;
+            }
+
             document.getElementById('output').value = yaml;
             
             // Auto-copy to clipboard
             navigator.clipboard.writeText(yaml).then(() => {
-                alert('Theme YAML copied to clipboard! Save it as ' + themeName + '.yaml in ~/.config/themes/base16/');
+                alert(`${system.toUpperCase()} theme YAML copied to clipboard! Save it as ${themeName}.yaml in ~/.config/themes/${themeDir}/`);
             }).catch(() => {
-                alert('Theme generated! Copy the YAML and save it as ' + themeName + '.yaml in ~/.config/themes/base16/');
+                alert(`Theme generated! Copy the YAML and save it as ${themeName}.yaml in ~/.config/themes/${themeDir}/`);
             });
         }
 
@@ -414,9 +523,12 @@ palette:
         }
 
         function copyColors() {
-            const colors = Object.values(colorScheme).join(', ');
+            const relevantColors = currentMode === 'base16' 
+                ? Object.entries(colorScheme).filter(([key]) => key.match(/^base0[0-9A-F]$/)).map(([,color]) => color)
+                : Object.values(colorScheme);
+            const colors = relevantColors.join(', ');
             navigator.clipboard.writeText(colors).then(() => {
-                alert('All hex colors copied to clipboard!');
+                alert(`All ${currentMode.toUpperCase()} hex colors copied to clipboard!`);
             }).catch(() => {
                 document.getElementById('output').value = colors;
                 alert('Colors displayed in output area. Copy them manually.');
