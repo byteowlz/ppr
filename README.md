@@ -1,6 +1,6 @@
 ![ppr_banner](ppr_logo_banner_black.png)
 
-# ppr
+# ppr - base16 & base24 wallpaper switcher
 
 ppr is a cross-platform CLI tool for creating themed wallpapers from SVG templates using base16/base24 color schemes.
 
@@ -435,6 +435,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
+- [tinty](https://github.com/tinted-theming/tinty) this project gave me the idea for ppr
 - [Base16](https://github.com/chriskempson/base16) project for the color scheme specification
 - [Base24](https://github.com/Base24/base24) project for extended color schemes
 - [oksvg](https://github.com/srwiley/oksvg) for SVG rendering
