@@ -97,6 +97,7 @@ aurs:
       - go
     package: |-
       cd "$srcdir"
+      go mod download
       export CGO_ENABLED=0
       export GOOS=linux
       go build \
@@ -119,3 +120,4 @@ release:
   draft: false
   prerelease: auto
   name_template: "Release {{.Version}}"
+  mode: replace
