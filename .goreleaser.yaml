@@ -95,6 +95,9 @@ aurs:
     git_url: "ssh://aur@aur.archlinux.org/ppr.git"
     depends:
       - go
+    prepare: |-
+      cd "$srcdir"
+      go mod download
     package: |-
       cd "$srcdir"
       export CGO_ENABLED=0
@@ -119,3 +122,4 @@ release:
   draft: false
   prerelease: auto
   name_template: "Release {{.Version}}"
+  mode: replace
