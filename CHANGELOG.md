@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/byteowlz/ppr/compare/v1.0.4...1.0.5) (2025-08-18)
+
+### Bug Fixes
+
+* fixed AUR PKGBUILD script ([8dbffb7](https://github.com/byteowlz/ppr/commit/8dbffb77b89671cfa6343d9e8dd9c5427fe1236b))
+* fixed AUR PKGBUILD script ([4e0f045](https://github.com/byteowlz/ppr/commit/4e0f045a7375ae6b5da153ebcc639bde342352d0))
+
 ## 1.0.0 (2025-08-16)
 
 ### Features
