@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -103,40 +105,127 @@ func runSwitchCurrent(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	outputDir := cfg.OutputPath
+	// Determine output directories and paths
+	baseOutputDir := cfg.OutputPath
 	if switchOutputPath != "" {
-		outputDir = switchOutputPath
+		baseOutputDir = switchOutputPath
 	}
 
-	filename := switchOutputFilename
-	if filename == "" {
-		timestamp := time.Now().Format("20060102-150405")
+	// Create theme subdirectory under ppr for named variants
+	themeSubDir := filepath.Join(baseOutputDir, "ppr", newThemeName)
+	if err := os.MkdirAll(themeSubDir, 0755); err != nil {
+		return fmt.Errorf("failed to create theme subdirectory: %w", err)
+	}
+
+	// Generate simplified filename for named variant (no timestamp)
+	namedFilename := switchOutputFilename
+	if namedFilename == "" {
+		templateName := filepath.Base(templatePath)
+		// Remove .svg extension if present
+		if filepath.Ext(templateName) == ".svg" {
+			templateName = templateName[:len(templateName)-4]
+		}
 		if switchOutputSVG {
-			filename = fmt.Sprintf("%s-%s-%s.svg", newThemeName, filepath.Base(templatePath), timestamp)
+			namedFilename = fmt.Sprintf("%s.svg", templateName)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s.png", newThemeName, filepath.Base(templatePath), timestamp)
+			namedFilename = fmt.Sprintf("%s.png", templateName)
 		}
 	}
 
-	finalOutputPath := filepath.Join(outputDir, filename)
+	// Paths for both files
+	namedVariantPath := filepath.Join(themeSubDir, namedFilename)
+	currentWallpaperPath := filepath.Join(baseOutputDir, "current.png")
 
 	if switchOutputSVG {
-		// Write SVG directly with resolved colors
-		if err := processor.WriteSVG(svgContent, finalOutputPath); err != nil {
-			return fmt.Errorf("failed to write SVG: %w", err)
+		// For SVG, only write the named variant (current.png doesn't make sense for SVG)
+		// Check if named variant already exists
+		if _, err := os.Stat(namedVariantPath); err == nil {
+			fmt.Printf("Reusing existing SVG: %s\n", namedVariantPath)
+		} else {
+			if err := processor.WriteSVG(svgContent, namedVariantPath); err != nil {
+				return fmt.Errorf("failed to write SVG: %w", err)
+			}
+			fmt.Printf("Generated SVG: %s\n", namedVariantPath)
 		}
-		fmt.Printf("Generated SVG: %s\n", finalOutputPath)
 	} else {
 		generator := image.NewGenerator()
-		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, finalOutputPath); err != nil {
-			return fmt.Errorf("failed to generate wallpaper: %w", err)
+		var namedVariantExists bool
+
+		// Check if named variant already exists, generate if not
+		if _, err := os.Stat(namedVariantPath); err == nil {
+			fmt.Printf("Reusing existing wallpaper: %s (%s)\n", namedVariantPath, res.String())
+			namedVariantExists = true
+		} else {
+			if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, namedVariantPath); err != nil {
+				return fmt.Errorf("failed to generate named wallpaper: %w", err)
+			}
+			fmt.Printf("Generated wallpaper: %s (%s)\n", namedVariantPath, res.String())
+			namedVariantExists = true
 		}
-		fmt.Printf("Switched to theme '%s': %s (%s)\n", newThemeName, finalOutputPath, res.String())
+
+		// Copy named variant to current.png (more efficient than regenerating)
+		if namedVariantExists {
+			// Inline file copy to avoid function duplication
+			sourceFile, err := os.Open(namedVariantPath)
+			if err != nil {
+				return fmt.Errorf("failed to open source file: %w", err)
+			}
+			defer sourceFile.Close()
+
+			destFile, err := os.Create(currentWallpaperPath)
+			if err != nil {
+				return fmt.Errorf("failed to create dest file: %w", err)
+			}
+			defer destFile.Close()
+
+			if _, err := io.Copy(destFile, sourceFile); err != nil {
+				return fmt.Errorf("failed to copy file: %w", err)
+			}
+
+			fmt.Printf("Switched to theme '%s': %s\n", newThemeName, currentWallpaperPath)
+		}
+	}
+
+	// Use current.png for wallpaper setting (or named variant for SVG)
+	wallpaperPath := currentWallpaperPath
+	if switchOutputSVG {
+		wallpaperPath = namedVariantPath
 	}
 
 	if switchSetWallpaper || cfg.AutoSetWallpaper {
+		// For macOS wallpaper caching issue, create a temporary file with unique name
+		// This ensures the system recognizes it as a new wallpaper file
+		timestamp := time.Now().Format("20060102-150405")
+		tempWallpaperPath := filepath.Join(baseOutputDir, fmt.Sprintf("current_temp_%s.png", timestamp))
+
+		// Copy current wallpaper to temp file for setting
+		if !switchOutputSVG {
+			// Inline file copy for temp wallpaper
+			sourceFile, err := os.Open(wallpaperPath)
+			if err != nil {
+				fmt.Printf("Warning: failed to open wallpaper file: %v\n", err)
+			} else {
+				defer sourceFile.Close()
+
+				destFile, err := os.Create(tempWallpaperPath)
+				if err != nil {
+					fmt.Printf("Warning: failed to create temp wallpaper file: %v\n", err)
+				} else {
+					defer destFile.Close()
+
+					if _, err := io.Copy(destFile, sourceFile); err != nil {
+						fmt.Printf("Warning: failed to copy to temp wallpaper: %v\n", err)
+					} else {
+						wallpaperPath = tempWallpaperPath
+						// Clean up old temp files (keep only the current one)
+						inlineCleanupOldTempFiles(baseOutputDir)
+					}
+				}
+			}
+		}
+
 		setter := wallpaper.NewSetter()
-		if err := setter.SetWallpaper(finalOutputPath); err != nil {
+		if err := setter.SetWallpaper(wallpaperPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
 		} else {
 			fmt.Println("Wallpaper set successfully!")
@@ -146,7 +235,7 @@ func runSwitchCurrent(cmd *cobra.Command, args []string) error {
 	// Update current state in config
 	cfg.CurrentTheme = newThemeName
 	cfg.CurrentTemplate = filepath.Base(templatePath)
-	cfg.LastOutputPath = finalOutputPath
+	cfg.LastOutputPath = wallpaperPath
 	if err := cfg.Save(); err != nil {
 		fmt.Printf("Warning: failed to save current state: %v\n", err)
 	}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -108,48 +109,65 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		baseOutputDir = outputPath
 	}
 
-	// Create ppr subdirectory for named variants
-	pprSubDir := filepath.Join(baseOutputDir, "ppr")
-	if err := os.MkdirAll(pprSubDir, 0755); err != nil {
-		return fmt.Errorf("failed to create ppr subdirectory: %w", err)
+	// Create theme subdirectory under ppr for named variants
+	themeSubDir := filepath.Join(baseOutputDir, "ppr", themeName)
+	if err := os.MkdirAll(themeSubDir, 0755); err != nil {
+		return fmt.Errorf("failed to create theme subdirectory: %w", err)
 	}
 
-	// Generate filename for named variant
+	// Generate simplified filename for named variant (no timestamp)
 	namedFilename := outputFilename
 	if namedFilename == "" {
-		timestamp := time.Now().Format("20060102-150405")
+		templateName := filepath.Base(templatePath)
+		// Remove .svg extension if present
+		if filepath.Ext(templateName) == ".svg" {
+			templateName = templateName[:len(templateName)-4]
+		}
 		if outputSVG {
-			namedFilename = fmt.Sprintf("%s-%s-%s.svg", themeName, filepath.Base(templatePath), timestamp)
+			namedFilename = fmt.Sprintf("%s.svg", templateName)
 		} else {
-			namedFilename = fmt.Sprintf("%s-%s-%s.png", themeName, filepath.Base(templatePath), timestamp)
+			namedFilename = fmt.Sprintf("%s.png", templateName)
 		}
 	}
 
 	// Paths for both files
-	namedVariantPath := filepath.Join(pprSubDir, namedFilename)
+	namedVariantPath := filepath.Join(themeSubDir, namedFilename)
 	currentWallpaperPath := filepath.Join(baseOutputDir, "current.png")
 
 	if outputSVG {
 		// For SVG, only write the named variant (current.png doesn't make sense for SVG)
-		if err := processor.WriteSVG(svgContent, namedVariantPath); err != nil {
-			return fmt.Errorf("failed to write SVG: %w", err)
+		// Check if named variant already exists
+		if _, err := os.Stat(namedVariantPath); err == nil {
+			fmt.Printf("Reusing existing SVG: %s\n", namedVariantPath)
+		} else {
+			if err := processor.WriteSVG(svgContent, namedVariantPath); err != nil {
+				return fmt.Errorf("failed to write SVG: %w", err)
+			}
+			fmt.Printf("Generated SVG: %s\n", namedVariantPath)
 		}
-		fmt.Printf("Generated SVG: %s\n", namedVariantPath)
 	} else {
 		generator := image.NewGenerator()
+		var namedVariantExists bool
 
-		// Generate the named variant in ppr/ subdirectory
-		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, namedVariantPath); err != nil {
-			return fmt.Errorf("failed to generate named wallpaper: %w", err)
+		// Check if named variant already exists, generate if not
+		if _, err := os.Stat(namedVariantPath); err == nil {
+			fmt.Printf("Reusing existing wallpaper: %s (%s)\n", namedVariantPath, res.String())
+			namedVariantExists = true
+		} else {
+			if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, namedVariantPath); err != nil {
+				return fmt.Errorf("failed to generate named wallpaper: %w", err)
+			}
+			fmt.Printf("Generated wallpaper: %s (%s)\n", namedVariantPath, res.String())
+			namedVariantExists = true
 		}
 
-		// Generate current.png in the main wallpaper directory
-		if err := generator.GenerateWallpaper(svgContent, res.Width, res.Height, currentWallpaperPath); err != nil {
-			return fmt.Errorf("failed to generate current wallpaper: %w", err)
+		// Copy named variant to current.png (more efficient than regenerating)
+		if namedVariantExists {
+			if err := copyFile(namedVariantPath, currentWallpaperPath); err != nil {
+				return fmt.Errorf("failed to copy to current wallpaper: %w", err)
+			}
+			fmt.Printf("Current wallpaper saved as: %s\n", currentWallpaperPath)
 		}
-
-		fmt.Printf("Generated wallpaper: %s (%s)\n", namedVariantPath, res.String())
-		fmt.Printf("Current wallpaper saved as: %s\n", currentWallpaperPath)
 	}
 
 	// Use current.png for wallpaper setting (or named variant for SVG)
@@ -159,6 +177,22 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	if setWallpaper || cfg.AutoSetWallpaper {
+		// For macOS wallpaper caching issue, create a temporary file with unique name
+		// This ensures the system recognizes it as a new wallpaper file
+		timestamp := time.Now().Format("20060102-150405")
+		tempWallpaperPath := filepath.Join(baseOutputDir, fmt.Sprintf("current_temp_%s.png", timestamp))
+
+		// Copy current wallpaper to temp file for setting
+		if !outputSVG {
+			if err := copyFile(wallpaperPath, tempWallpaperPath); err != nil {
+				fmt.Printf("Warning: failed to create temp wallpaper file: %v\n", err)
+			} else {
+				wallpaperPath = tempWallpaperPath
+				// Clean up old temp files (keep only the current one)
+				inlineCleanupOldTempFiles(baseOutputDir)
+			}
+		}
+
 		setter := wallpaper.NewSetter()
 		if err := setter.SetWallpaper(wallpaperPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
@@ -176,4 +210,22 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// copyFile copies a file from src to dst
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	return err
 }
