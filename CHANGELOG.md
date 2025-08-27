@@ -1,3 +1,9 @@
+## [1.0.6](https://github.com/byteowlz/ppr/compare/1.0.5...1.0.6) (2025-08-27)
+
+### Bug Fixes
+
+* resolved conflicting --svg and -w flags ([5659054](https://github.com/byteowlz/ppr/commit/565905453a1f792245a21d23949b27f878312249))
+
 ## [1.0.5](https://github.com/byteowlz/ppr/compare/v1.0.4...1.0.5) (2025-08-18)
 
 ### Bug Fixes
