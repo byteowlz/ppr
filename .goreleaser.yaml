@@ -95,8 +95,9 @@ aurs:
     git_url: "ssh://aur@aur.archlinux.org/ppr.git"
     depends:
       - go
+    source: "{{.ProjectName}}-{{.Version}}.tar.gz::https://github.com/byteowlz/ppr/archive/{{.Version}}.tar.gz"
     package: |-
-      cd "$srcdir"
+      cd "${srcdir}/{{.ProjectName}}-{{.Version}}"
       go mod download
       export CGO_ENABLED=0
       export GOOS=linux
