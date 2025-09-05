@@ -1,3 +1,9 @@
+## [1.0.8](https://github.com/byteowlz/ppr/compare/v1.0.7...1.0.8) (2025-09-05)
+
+### Bug Fixes
+
+* fixed ~ expansion in config.toml file ([4fb3737](https://github.com/byteowlz/ppr/commit/4fb373785ef826b90f8b6ed14190f08cfc1c8a33))
+
 ## [1.0.6](https://github.com/byteowlz/ppr/compare/1.0.5...1.0.6) (2025-08-27)
 
 ### Bug Fixes
