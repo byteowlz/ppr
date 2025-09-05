@@ -100,8 +100,8 @@ aur_sources:
      license: "MIT"
      private_key: "{{ .Env.AUR_KEY }}"
      git_url: "ssh://aur@aur.archlinux.org/ppr.git"
-     depends:
-       - go
+      depends:
+        - go
       url_template: "https://github.com/byteowlz/ppr/releases/download/{{.Version}}/{{.ProjectName}}-{{.Version}}.tar.gz"
      package: |-
        cd "${srcdir}/{{.ProjectName}}-{{.Version}}"
