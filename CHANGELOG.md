@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/byteowlz/ppr/compare/1.1.0...1.1.1) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([52bbe3f](https://github.com/byteowlz/ppr/commit/52bbe3ffe096a962e02ba4fc05670173c33ca551))
+
 ## [1.1.0](https://github.com/byteowlz/ppr/compare/1.0.11...1.1.0) (2025-09-05)
 
 ### Features
