@@ -25,11 +25,10 @@ type Config struct {
 }
 
 func DefaultConfig() *Config {
-	homeDir, _ := os.UserHomeDir()
 	return &Config{
-		ThemesPath:         filepath.Join(homeDir, ".config", "ppr", "themes"),
-		TemplatesPath:      filepath.Join(homeDir, ".config", "ppr", "templates"),
-		OutputPath:         filepath.Join(homeDir, "Pictures", "ppr"),
+		ThemesPath:         "~/.config/ppr/themes",
+		TemplatesPath:      "~/.config/ppr/templates",
+		OutputPath:         "~/Pictures/ppr",
 		DefaultTheme:       "nord",
 		DefaultTemplate:    "geometric-simple.svg",
 		DefaultWidth:       1920,
@@ -79,6 +78,24 @@ func (c *Config) Save() error {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
+	// Create a copy to modify paths for saving
+	configCopy := *c
+	homeDir, _ := os.UserHomeDir()
+
+	// Replace homeDir with ~ in paths
+	if strings.HasPrefix(configCopy.ThemesPath, homeDir) {
+		configCopy.ThemesPath = "~" + configCopy.ThemesPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.TemplatesPath, homeDir) {
+		configCopy.TemplatesPath = "~" + configCopy.TemplatesPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.OutputPath, homeDir) {
+		configCopy.OutputPath = "~" + configCopy.OutputPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.LastOutputPath, homeDir) {
+		configCopy.LastOutputPath = "~" + configCopy.LastOutputPath[len(homeDir):]
+	}
+
 	configPath := GetConfigPath()
 	file, err := os.Create(configPath)
 	if err != nil {
@@ -87,7 +104,7 @@ func (c *Config) Save() error {
 	defer file.Close()
 
 	encoder := toml.NewEncoder(file)
-	if err := encoder.Encode(c); err != nil {
+	if err := encoder.Encode(&configCopy); err != nil {
 		return fmt.Errorf("failed to encode config: %w", err)
 	}
 
@@ -107,9 +124,16 @@ func (c *Config) EnsureDirectories() error {
 }
 
 func expandPath(path string) string {
-	if strings.HasPrefix(path, "~/") {
+	if strings.HasPrefix(path, "~") {
 		homeDir, _ := os.UserHomeDir()
-		return filepath.Join(homeDir, path[2:])
+		if len(path) == 1 {
+			return homeDir
+		} else if path[1] == '/' {
+			return filepath.Join(homeDir, path[2:])
+		} else {
+			// ~ followed by other characters, treat as ~/
+			return filepath.Join(homeDir, path[1:])
+		}
 	}
 	return path
 }
