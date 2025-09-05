@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -22,6 +23,7 @@ type Config struct {
 	CurrentTemplate    string   `toml:"current_template"`
 	LastOutputPath     string   `toml:"last_output_path"`
 	PreferredTemplates []string `toml:"preferred_templates"`
+	OnWallpaperSet     string   `toml:"on_wallpaper_set"`
 }
 
 func DefaultConfig() *Config {
@@ -38,6 +40,7 @@ func DefaultConfig() *Config {
 		CurrentTemplate:    "",
 		LastOutputPath:     "",
 		PreferredTemplates: []string{"all"},
+		OnWallpaperSet:     "",
 	}
 }
 
@@ -136,4 +139,27 @@ func expandPath(path string) string {
 		}
 	}
 	return path
+}
+
+// ExecuteOnWallpaperSet runs the configured script when wallpaper is set
+func (c *Config) ExecuteOnWallpaperSet() error {
+	if c.OnWallpaperSet == "" {
+		return nil
+	}
+
+	fmt.Printf("Executing custom script: %s\n", c.OnWallpaperSet)
+
+	cmd := exec.Command("/bin/bash", "-c", c.OnWallpaperSet)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		if cmd.ProcessState != nil {
+			fmt.Printf("Script execution failed with exit code: %d\n", cmd.ProcessState.ExitCode())
+		}
+		return fmt.Errorf("failed to execute custom script: %w", err)
+	}
+
+	fmt.Printf("Custom script executed successfully\n")
+	return nil
 }

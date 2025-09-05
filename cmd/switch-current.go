@@ -225,10 +225,22 @@ func runSwitchCurrent(cmd *cobra.Command, args []string) error {
 		}
 
 		setter := wallpaper.NewSetter()
+		wallpaperSet := false
+
 		if err := setter.SetWallpaper(wallpaperPath); err != nil {
 			fmt.Printf("Warning: failed to set wallpaper: %v\n", err)
 		} else {
 			fmt.Println("Wallpaper set successfully!")
+			wallpaperSet = true
+		}
+
+		// Execute custom script if configured (regardless of built-in setter success)
+		if cfg.OnWallpaperSet != "" {
+			if err := cfg.ExecuteOnWallpaperSet(); err != nil {
+				fmt.Printf("Warning: failed to execute custom script: %v\n", err)
+			} else if !wallpaperSet {
+				fmt.Println("Wallpaper set via custom script!")
+			}
 		}
 	}
 

@@ -199,7 +199,42 @@ current_theme = "nord"
 current_template = "shapes.svg"
 last_output_path = "/path/to/last/generated/image.png"
 preferred_templates = ["all"]  # or ["shapes", "horizontal_bar", "vertical_bar"]
+on_wallpaper_set = ""  # Custom script to run after setting wallpaper
 ```
+
+## Custom Scripts
+
+You can configure custom scripts to run automatically after setting a wallpaper with `ppr cycle` or `ppr generate -w`. This is useful for integrating with other wallpaper managers like hyprpaper, swaybg, etc.
+
+**Note**: Custom scripts run regardless of whether ppr's built-in wallpaper setter succeeds or fails, allowing you to use your preferred wallpaper manager.
+
+### Example Usage
+
+```toml
+# For hyprpaper
+on_wallpaper_set = "hyprctl hyprpaper wallpaper \",$(cat ~/.cache/current_wallpaper_path.txt)\""
+
+# For swaybg
+on_wallpaper_set = "swaybg -i ~/.config/wallpaper/current.png -m fill"
+
+# For uwsm + swaybg (background process)
+on_wallpaper_set = "setsid uwsm app -- swaybg -i ~/.config/wallpaper/current.png -m fill >/dev/null 2>&1 &"
+
+# Multiple commands
+on_wallpaper_set = "notify-send 'Wallpaper changed' && hyprctl hyprpaper reload"
+```
+
+### Troubleshooting
+
+If your script isn't working:
+
+1. **Check the path**: Use the same path as your `output_path` + `/current.png`
+2. **Test manually**: Run your script directly in terminal first
+3. **Check permissions**: Ensure the script commands are executable
+4. **TOML syntax**: Keep the entire script on one line in quotes
+5. **Debug output**: ppr will show "Executing custom script:" and success/failure messages
+
+The script runs with `/bin/bash -c` and has access to your environment variables.
 
 ## Creating SVG Templates
 
