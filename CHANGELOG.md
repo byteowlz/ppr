@@ -1,3 +1,9 @@
+## [1.0.9](https://github.com/byteowlz/ppr/compare/1.0.8...1.0.9) (2025-09-05)
+
+### Bug Fixes
+
+* fixed PKGBUILD ([dec0205](https://github.com/byteowlz/ppr/commit/dec02053fd7c75d758b793ac3bb18c092d0e8b1f))
+
 ## [1.0.8](https://github.com/byteowlz/ppr/compare/v1.0.7...1.0.8) (2025-09-05)
 
 ### Bug Fixes
