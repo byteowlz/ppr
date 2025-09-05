@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/byteowlz/ppr/compare/1.0.11...1.1.0) (2025-09-05)
+
+### Features
+
+* added custom script support for setting wallpaper e.g. with swaybg or hyprpaper ([09b69a1](https://github.com/byteowlz/ppr/commit/09b69a1721becc5e4cb14b25b9efdaf66be24918))
+
 ## [1.0.11](https://github.com/byteowlz/ppr/compare/1.0.10...1.0.11) (2025-09-05)
 
 ### Bug Fixes
