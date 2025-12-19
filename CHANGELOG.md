@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/byteowlz/ppr/compare/1.1.3...1.2.0) (2025-12-19)
+
+### Features
+
+* added 'ppr set <template_name>' command that works with and without file extension and supports fuzzy matching. Renamed old 'ppr set-wallpaper' to 'ppr from-file <path_to_file>'. ([ff556de](https://github.com/byteowlz/ppr/commit/ff556de855a81081e91e24e5c8c1e9c9cab0e7d8))
+
 ## [1.1.3](https://github.com/byteowlz/ppr/compare/1.1.2...1.1.3) (2025-09-05)
 
 ### Bug Fixes
