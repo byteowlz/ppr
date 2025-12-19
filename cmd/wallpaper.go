@@ -8,9 +8,9 @@ import (
 )
 
 var setWallpaperCmd = &cobra.Command{
-	Use:   "set-wallpaper [image-path]",
-	Short: "Set an image as wallpaper",
-	Long:  `Set the specified image as the desktop wallpaper. Works cross-platform.`,
+	Use:   "from-file <image-path>",
+	Short: "Set wallpaper from an existing image file",
+	Long:  `Set the desktop wallpaper from an existing image file (PNG, JPG, etc.).`,
 	Args:  cobra.ExactArgs(1),
 	RunE:  runSetWallpaper,
 }

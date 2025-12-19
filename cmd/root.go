@@ -56,5 +56,6 @@ func init() {
 	rootCmd.AddCommand(batchConvertCmd)
 	rootCmd.AddCommand(switchCurrentCmd)
 	rootCmd.AddCommand(cycleCmd)
+	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(versionCmd)
 }
