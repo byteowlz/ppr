@@ -1,3 +1,57 @@
+## [1.1.3](https://github.com/byteowlz/ppr/compare/1.1.2...1.1.3) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([a67751d](https://github.com/byteowlz/ppr/commit/a67751d8cf859657f62297922c5b0eb6d248e2cb))
+
+## [1.1.2](https://github.com/byteowlz/ppr/compare/1.1.1...1.1.2) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([245b918](https://github.com/byteowlz/ppr/commit/245b91891ea5bf1a747d09e22a979180a443966b))
+
+## [1.1.1](https://github.com/byteowlz/ppr/compare/1.1.0...1.1.1) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([52bbe3f](https://github.com/byteowlz/ppr/commit/52bbe3ffe096a962e02ba4fc05670173c33ca551))
+
+## [1.1.0](https://github.com/byteowlz/ppr/compare/1.0.11...1.1.0) (2025-09-05)
+
+### Features
+
+* added custom script support for setting wallpaper e.g. with swaybg or hyprpaper ([09b69a1](https://github.com/byteowlz/ppr/commit/09b69a1721becc5e4cb14b25b9efdaf66be24918))
+
+## [1.0.11](https://github.com/byteowlz/ppr/compare/1.0.10...1.0.11) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([40ceff9](https://github.com/byteowlz/ppr/commit/40ceff98b6a5fe751fa92814b11dfc88ce937a5f))
+
+## [1.0.10](https://github.com/byteowlz/ppr/compare/1.0.9...1.0.10) (2025-09-05)
+
+### Bug Fixes
+
+* fixed goreleaser.yml ([13b6fcd](https://github.com/byteowlz/ppr/commit/13b6fcdb519881a15c5d31b3301e014e9221f967))
+
+## [1.0.9](https://github.com/byteowlz/ppr/compare/1.0.8...1.0.9) (2025-09-05)
+
+### Bug Fixes
+
+* fixed PKGBUILD ([dec0205](https://github.com/byteowlz/ppr/commit/dec02053fd7c75d758b793ac3bb18c092d0e8b1f))
+
+## [1.0.8](https://github.com/byteowlz/ppr/compare/v1.0.7...1.0.8) (2025-09-05)
+
+### Bug Fixes
+
+* fixed ~ expansion in config.toml file ([4fb3737](https://github.com/byteowlz/ppr/commit/4fb373785ef826b90f8b6ed14190f08cfc1c8a33))
+
+## [1.0.6](https://github.com/byteowlz/ppr/compare/1.0.5...1.0.6) (2025-08-27)
+
+### Bug Fixes
+
+* resolved conflicting --svg and -w flags ([5659054](https://github.com/byteowlz/ppr/commit/565905453a1f792245a21d23949b27f878312249))
+
 ## [1.0.5](https://github.com/byteowlz/ppr/compare/v1.0.4...1.0.5) (2025-08-18)
 
 ### Bug Fixes

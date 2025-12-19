@@ -1,0 +1,34 @@
+# Maintainer: Tommy Falkowski <tommy@byteowlz.com>
+
+pkgname='ppr'
+pkgver=1.0.8
+pkgrel=1
+pkgdesc='ppr - CLI tool for creating themed wallpapers from SVG templates'
+url='https://github.com/byteowlz/ppr'
+arch=('aarch64' 'x86_64')
+license=('MIT')
+provides=('ppr')
+conflicts=('ppr-bin')
+depends=('go')
+
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/byteowlz/ppr/archive/${pkgver}.tar.gz")
+sha256sums=('SKIP')  # Replace with actual sha256sum
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  go mod download
+  export CGO_ENABLED=0
+  export GOOS=linux
+  go build \
+    -trimpath \
+    -buildmode=pie \
+    -mod=readonly \
+    -modcacherw \
+    -ldflags "-linkmode external -extldflags \"$LDFLAGS\" -X main.version=${pkgver} -X main.commit=46e149d988b0875a6fd2c4be63a1bf73dc3ecbd0 -X main.date=2025-09-05T08:17:58Z" \
+    -o ppr .
+
+  # bin
+  install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
+  # license
+  install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+}

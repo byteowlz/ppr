@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -22,14 +23,14 @@ type Config struct {
 	CurrentTemplate    string   `toml:"current_template"`
 	LastOutputPath     string   `toml:"last_output_path"`
 	PreferredTemplates []string `toml:"preferred_templates"`
+	OnWallpaperSet     string   `toml:"on_wallpaper_set"`
 }
 
 func DefaultConfig() *Config {
-	homeDir, _ := os.UserHomeDir()
 	return &Config{
-		ThemesPath:         filepath.Join(homeDir, ".config", "ppr", "themes"),
-		TemplatesPath:      filepath.Join(homeDir, ".config", "ppr", "templates"),
-		OutputPath:         filepath.Join(homeDir, "Pictures", "ppr"),
+		ThemesPath:         "~/.config/ppr/themes",
+		TemplatesPath:      "~/.config/ppr/templates",
+		OutputPath:         "~/Pictures/ppr",
 		DefaultTheme:       "nord",
 		DefaultTemplate:    "geometric-simple.svg",
 		DefaultWidth:       1920,
@@ -39,6 +40,7 @@ func DefaultConfig() *Config {
 		CurrentTemplate:    "",
 		LastOutputPath:     "",
 		PreferredTemplates: []string{"all"},
+		OnWallpaperSet:     "",
 	}
 }
 
@@ -79,6 +81,24 @@ func (c *Config) Save() error {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
+	// Create a copy to modify paths for saving
+	configCopy := *c
+	homeDir, _ := os.UserHomeDir()
+
+	// Replace homeDir with ~ in paths
+	if strings.HasPrefix(configCopy.ThemesPath, homeDir) {
+		configCopy.ThemesPath = "~" + configCopy.ThemesPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.TemplatesPath, homeDir) {
+		configCopy.TemplatesPath = "~" + configCopy.TemplatesPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.OutputPath, homeDir) {
+		configCopy.OutputPath = "~" + configCopy.OutputPath[len(homeDir):]
+	}
+	if strings.HasPrefix(configCopy.LastOutputPath, homeDir) {
+		configCopy.LastOutputPath = "~" + configCopy.LastOutputPath[len(homeDir):]
+	}
+
 	configPath := GetConfigPath()
 	file, err := os.Create(configPath)
 	if err != nil {
@@ -87,7 +107,7 @@ func (c *Config) Save() error {
 	defer file.Close()
 
 	encoder := toml.NewEncoder(file)
-	if err := encoder.Encode(c); err != nil {
+	if err := encoder.Encode(&configCopy); err != nil {
 		return fmt.Errorf("failed to encode config: %w", err)
 	}
 
@@ -107,9 +127,39 @@ func (c *Config) EnsureDirectories() error {
 }
 
 func expandPath(path string) string {
-	if strings.HasPrefix(path, "~/") {
+	if strings.HasPrefix(path, "~") {
 		homeDir, _ := os.UserHomeDir()
-		return filepath.Join(homeDir, path[2:])
+		if len(path) == 1 {
+			return homeDir
+		} else if path[1] == '/' {
+			return filepath.Join(homeDir, path[2:])
+		} else {
+			// ~ followed by other characters, treat as ~/
+			return filepath.Join(homeDir, path[1:])
+		}
 	}
 	return path
+}
+
+// ExecuteOnWallpaperSet runs the configured script when wallpaper is set
+func (c *Config) ExecuteOnWallpaperSet() error {
+	if c.OnWallpaperSet == "" {
+		return nil
+	}
+
+	fmt.Printf("Executing custom script: %s\n", c.OnWallpaperSet)
+
+	cmd := exec.Command("/bin/bash", "-c", c.OnWallpaperSet)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		if cmd.ProcessState != nil {
+			fmt.Printf("Script execution failed with exit code: %d\n", cmd.ProcessState.ExitCode())
+		}
+		return fmt.Errorf("failed to execute custom script: %w", err)
+	}
+
+	fmt.Printf("Custom script executed successfully\n")
+	return nil
 }

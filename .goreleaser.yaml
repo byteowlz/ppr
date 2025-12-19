@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+version: 2
 project_name: ppr
 
 before:
@@ -40,6 +42,10 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}'
+
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 
@@ -71,47 +77,47 @@ brews:
       bin.install "ppr"
 
 aurs:
-  - name: ppr-bin
-    homepage: "https://github.com/byteowlz/ppr"
-    description: "ppr - CLI tool for creating themed wallpapers from SVG templates (binary)"
-    maintainers:
-      - "Tommy Falkowski <tommy@byteowlz.com>"
-    license: "MIT"
-    private_key: "{{ .Env.AUR_KEY }}"
-    git_url: "ssh://aur@aur.archlinux.org/ppr-bin.git"
-    package: |-
-      # bin
-      install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
-      # license
-      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+    - name: ppr-bin
+      homepage: "https://github.com/byteowlz/ppr"
+      description: "ppr - CLI tool for creating themed wallpapers from SVG templates (binary)"
+      maintainers:
+        - "Tommy Falkowski <tommy@byteowlz.com>"
+      license: "MIT"
+      private_key: "{{ .Env.AUR_KEY }}"
+      git_url: "ssh://aur@aur.archlinux.org/ppr-bin.git"
+      package: |-
+        # bin
+        install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
+        # license
+        install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+    - name: ppr
+      homepage: "https://github.com/byteowlz/ppr"
+      description: "ppr - CLI tool for creating themed wallpapers from SVG templates"
+      maintainers:
+        - "Tommy Falkowski <tommy@byteowlz.com>"
+      license: "MIT"
+      private_key: "{{ .Env.AUR_KEY }}"
+      git_url: "ssh://aur@aur.archlinux.org/ppr.git"
+      depends:
+        - go
+      url_template: "https://github.com/byteowlz/ppr/releases/download/{{.Version}}/{{.ProjectName}}-{{.Version}}.tar.gz"
+      package: |-
+        cd "${srcdir}/{{.ProjectName}}-{{.Version}}"
+        go mod download
+        export CGO_ENABLED=0
+        export GOOS=linux
+        go build \
+          -trimpath \
+          -buildmode=pie \
+          -mod=readonly \
+          -modcacherw \
+          -ldflags "-linkmode external -extldflags \"$LDFLAGS\" -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}" \
+          -o ppr .
 
-  - name: ppr
-    homepage: "https://github.com/byteowlz/ppr"
-    description: "ppr - CLI tool for creating themed wallpapers from SVG templates"
-    maintainers:
-      - "Tommy Falkowski <tommy@byteowlz.com>"
-    license: "MIT"
-    private_key: "{{ .Env.AUR_KEY }}"
-    git_url: "ssh://aur@aur.archlinux.org/ppr.git"
-    depends:
-      - go
-    package: |-
-      cd "$srcdir"
-      go mod download
-      export CGO_ENABLED=0
-      export GOOS=linux
-      go build \
-        -trimpath \
-        -buildmode=pie \
-        -mod=readonly \
-        -modcacherw \
-        -ldflags "-linkmode external -extldflags \"$LDFLAGS\" -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}" \
-        -o ppr .
-
-      # bin
-      install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
-      # license
-      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
+        # bin
+        install -Dm755 "./ppr" "${pkgdir}/usr/bin/ppr"
+        # license
+        install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/ppr/LICENSE"
 
 release:
   github:
