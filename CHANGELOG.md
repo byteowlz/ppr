@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/byteowlz/ppr/compare/1.2.0...1.3.0) (2026-02-26)
+
+### Features
+
+* update wallpaper plist for all display configurations on macOS ([fb9eafe](https://github.com/byteowlz/ppr/commit/fb9eafe24baeaed4390bcef5c9b3576b9235eeee))
+
 ## [1.2.0](https://github.com/byteowlz/ppr/compare/1.1.3...1.2.0) (2025-12-19)
 
 ### Features
