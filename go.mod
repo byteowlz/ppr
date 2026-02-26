@@ -16,4 +16,5 @@ require (
 	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	howett.net/plist v1.0.1 // indirect
 )

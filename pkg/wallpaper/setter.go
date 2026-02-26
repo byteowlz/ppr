@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
+
+	"howett.net/plist"
 )
 
 type Setter struct{}
@@ -61,12 +64,161 @@ func (s *Setter) setMacOSWallpaper(imagePath string) error {
 	refreshCmd := exec.Command("osascript", "-e", `tell application "Finder" to activate`)
 	refreshCmd.Run()
 
+	// Update the wallpaper plist so ALL display configurations use this image.
+	// This prevents macOS from reverting to a stale wallpaper when monitors are
+	// connected/disconnected (each display config gets its own entry in the plist).
+	if err := s.updateWallpaperPlistAllDisplays(imagePath); err != nil {
+		fmt.Printf("Warning: failed to update wallpaper plist for all displays: %v\n", err)
+	}
+
 	// Verify the wallpaper was set by checking current desktop picture
 	if err := s.verifyWallpaperSet(imagePath); err != nil {
 		fmt.Printf("Warning: wallpaper verification failed: %v\n", err)
 	}
 
 	return nil
+}
+
+// updateWallpaperPlistAllDisplays reads the macOS wallpaper store plist and updates
+// every display configuration entry to use the given image. This fixes the issue where
+// connecting/disconnecting monitors causes macOS to revert to a stale wallpaper because
+// each display topology gets its own wallpaper config in the plist.
+//
+// The plist structure (macOS Sequoia) is:
+//
+//	AllSpacesAndDisplays: $null
+//	Displays:
+//	  <display-uuid>:
+//	    Desktop: { Content: { Choices: [{ Files: [{ relative: "file://..." }], Provider: "..." }] } }
+//	    Idle: ...
+//	Spaces:
+//	  <space-uuid>:
+//	    Default:
+//	      Desktop: { Content: ... }
+//	    Displays:
+//	      <display-uuid>:
+//	        Desktop: { Content: ... }
+//	SystemDefault:
+//	  Desktop: { Content: ... }
+func (s *Setter) updateWallpaperPlistAllDisplays(imagePath string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get home directory: %w", err)
+	}
+
+	plistPath := filepath.Join(homeDir, "Library", "Application Support", "com.apple.wallpaper", "Store", "Index.plist")
+
+	data, err := os.ReadFile(plistPath)
+	if err != nil {
+		return fmt.Errorf("failed to read wallpaper plist: %w", err)
+	}
+
+	var store map[string]interface{}
+	if _, err := plist.Unmarshal(data, &store); err != nil {
+		return fmt.Errorf("failed to parse wallpaper plist: %w", err)
+	}
+
+	// Build the file URL for the image
+	absPath, err := filepath.Abs(imagePath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path: %w", err)
+	}
+	fileURL := "file://" + absPath
+
+	updated := 0
+
+	// Update SystemDefault (top-level entry with Desktop/Idle directly)
+	if sysDefault, ok := store["SystemDefault"].(map[string]interface{}); ok {
+		updateDesktopEntry(sysDefault, fileURL)
+		updated++
+	}
+
+	// Update Displays (flat map of display-uuid -> {Desktop, Idle})
+	if displays, ok := store["Displays"].(map[string]interface{}); ok {
+		for _, displayVal := range displays {
+			if displayMap, ok := displayVal.(map[string]interface{}); ok {
+				updateDesktopEntry(displayMap, fileURL)
+				updated++
+			}
+		}
+	}
+
+	// Update Spaces (map of space-uuid -> {Default: {Desktop,Idle}, Displays: {uuid: {Desktop,Idle}}})
+	if spaces, ok := store["Spaces"].(map[string]interface{}); ok {
+		for _, spaceVal := range spaces {
+			spaceMap, ok := spaceVal.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			// Update the Default entry for this space
+			if defaultEntry, ok := spaceMap["Default"].(map[string]interface{}); ok {
+				updateDesktopEntry(defaultEntry, fileURL)
+				updated++
+			}
+
+			// Update each display within this space
+			if spaceDisplays, ok := spaceMap["Displays"].(map[string]interface{}); ok {
+				for _, displayVal := range spaceDisplays {
+					if displayMap, ok := displayVal.(map[string]interface{}); ok {
+						updateDesktopEntry(displayMap, fileURL)
+						updated++
+					}
+				}
+			}
+		}
+	}
+
+	// Write back in binary plist format (same as macOS uses)
+	outData, err := plist.Marshal(store, plist.BinaryFormat)
+	if err != nil {
+		return fmt.Errorf("failed to marshal wallpaper plist: %w", err)
+	}
+
+	if err := os.WriteFile(plistPath, outData, 0644); err != nil {
+		return fmt.Errorf("failed to write wallpaper plist: %w", err)
+	}
+
+	fmt.Printf("Updated wallpaper plist: %d entries set to %s\n", updated, filepath.Base(imagePath))
+	return nil
+}
+
+// updateDesktopEntry updates the Desktop -> Content -> Choices -> Files entry
+// within a wallpaper plist display/default entry to point to the given file URL.
+func updateDesktopEntry(entry map[string]interface{}, fileURL string) {
+	desktop, ok := entry["Desktop"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	content, ok := desktop["Content"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	choices, ok := content["Choices"].([]interface{})
+	if !ok || len(choices) == 0 {
+		return
+	}
+	choice, ok := choices[0].(map[string]interface{})
+	if !ok {
+		return
+	}
+	files, ok := choice["Files"].([]interface{})
+	if !ok || len(files) == 0 {
+		// Create a files entry if none exists
+		choice["Files"] = []interface{}{
+			map[string]interface{}{
+				"relative": fileURL,
+			},
+		}
+		choice["Provider"] = "com.apple.wallpaper.choice.image"
+		return
+	}
+	fileEntry, ok := files[0].(map[string]interface{})
+	if !ok {
+		return
+	}
+	fileEntry["relative"] = fileURL
+	choice["Provider"] = "com.apple.wallpaper.choice.image"
 }
 
 func (s *Setter) verifyWallpaperSet(expectedPath string) error {
