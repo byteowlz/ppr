@@ -247,6 +247,8 @@ func (s *Setter) setLinuxWallpaper(imagePath string) error {
 	desktopEnv := s.detectLinuxDesktopEnvironment()
 
 	switch desktopEnv {
+	case "hyprland":
+		return s.setHyprlandWallpaper(imagePath)
 	case "gnome":
 		return s.setGnomeWallpaper(imagePath)
 	case "kde":
@@ -261,6 +263,9 @@ func (s *Setter) setLinuxWallpaper(imagePath string) error {
 }
 
 func (s *Setter) detectLinuxDesktopEnvironment() string {
+	if s.isHyprland() {
+		return "hyprland"
+	}
 	if s.commandExists("gnome-session") {
 		return "gnome"
 	}
@@ -282,6 +287,51 @@ func (s *Setter) detectLinuxDesktopEnvironment() string {
 func (s *Setter) commandExists(cmd string) bool {
 	_, err := exec.LookPath(cmd)
 	return err == nil
+}
+
+func (s *Setter) isHyprland() bool {
+	if !s.commandExists("hyprctl") {
+		return false
+	}
+	desktop := strings.ToLower(os.Getenv("XDG_CURRENT_DESKTOP"))
+	return strings.Contains(desktop, "hyprland") || strings.Contains(desktop, "hypr")
+}
+
+// setHyprlandWallpaper applies a wallpaper on a Hyprland session by relaunching
+// swaybg detached from the user session, matching Omarchy's wallpaper behavior.
+func (s *Setter) setHyprlandWallpaper(imagePath string) error {
+	if s.commandExists("swaybg") {
+		// Stop any existing swaybg instance so only one stays alive.
+		if err := exec.Command("pkill", "-x", "swaybg").Run(); err != nil {
+			fmt.Printf("Note: no running swaybg to stop: %v\n", err)
+		}
+
+		args := []string{"swaybg", "-i", imagePath, "-m", "fill"}
+		if s.commandExists("uwsm-app") {
+			args = append([]string{"--"}, args...)
+			args = append([]string{"uwsm-app"}, args...)
+		}
+		var cmd *exec.Cmd
+		if s.commandExists("setsid") {
+			cmd = exec.Command("setsid", args...)
+		} else {
+			cmd = exec.Command(args[0], args[1:]...)
+		}
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to set wallpaper with swaybg: %w", err)
+		}
+		return nil
+	}
+
+	if s.commandExists("hyprctl") {
+		cmd := exec.Command("hyprctl", "hyprpaper", "reload")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to reload hyprpaper: %w", err)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("no suitable wallpaper setter found for Hyprland (tried swaybg, hyprctl)")
 }
 
 func (s *Setter) setGnomeWallpaper(imagePath string) error {

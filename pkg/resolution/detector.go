@@ -1,7 +1,9 @@
 package resolution
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
@@ -71,6 +73,12 @@ func (d *Detector) getMacOSResolution() (*Resolution, error) {
 }
 
 func (d *Detector) getLinuxResolution() (*Resolution, error) {
+	if d.isHyprland() {
+		if res, err := d.getHyprlandResolution(); err == nil {
+			return res, nil
+		}
+	}
+
 	cmd := exec.Command("xrandr")
 	output, err := cmd.Output()
 	if err != nil {
@@ -98,6 +106,52 @@ func (d *Detector) getLinuxResolution() (*Resolution, error) {
 	}
 
 	return d.getLinuxResolutionFallback()
+}
+
+// hyprMonitor mirrors the JSON object emitted by `hyprctl monitors -j`.
+type hyprMonitor struct {
+	Name       string `json:"name"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	FullWidth  int    `json:"fullWidth"`
+	FullHeight int    `json:"fullHeight"`
+	Focused    bool   `json:"focused"`
+}
+
+func (d *Detector) isHyprland() bool {
+	if _, err := exec.LookPath("hyprctl"); err != nil {
+		return false
+	}
+	desktop := strings.ToLower(os.Getenv("XDG_CURRENT_DESKTOP"))
+	return strings.Contains(desktop, "hyprland") || strings.Contains(desktop, "hypr")
+}
+
+func (d *Detector) getHyprlandResolution() (*Resolution, error) {
+	cmd := exec.Command("hyprctl", "monitors", "-j")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query hyprctl monitors: %w", err)
+	}
+
+	var monitors []hyprMonitor
+	if err := json.Unmarshal(output, &monitors); err != nil {
+		return nil, fmt.Errorf("failed to parse hyprctl monitors output: %w", err)
+	}
+
+	for _, m := range monitors {
+		if !m.Focused {
+			continue
+		}
+		width, height := m.Width, m.Height
+		if m.FullWidth > 0 && m.FullHeight > 0 {
+			width, height = m.FullWidth, m.FullHeight
+		}
+		if width > 0 && height > 0 {
+			return &Resolution{Width: width, Height: height}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no focused monitor found in hyprctl output")
 }
 
 func (d *Detector) getLinuxResolutionFallback() (*Resolution, error) {

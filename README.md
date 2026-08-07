@@ -410,13 +410,13 @@ The cycle command:
 ### Wallpaper Setting
 
 - **macOS**: Uses AppleScript
-- **Linux**: Supports GNOME, KDE, XFCE, i3/sway, and generic setters
+- **Linux**: Supports Hyprland (through `swaybg`, including Omarchy), GNOME, KDE, Xfce, i3/sway, and generic setters
 - **Windows**: Uses PowerShell and Windows API
 
 ### Resolution Detection
 
 - **macOS**: `system_profiler`
-- **Linux**: `xrandr` with `xdpyinfo` fallback
+- **Linux**: `hyprctl` on Hyprland/Wayland, with `xrandr` and `xdpyinfo` fallbacks on X11
 - **Windows**: `wmic`
 
 ## Development
